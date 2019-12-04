@@ -1,0 +1,12 @@
+- view:
+    name: TF-A
+    view-type: list
+    regex: ^tf-a-.*
+    columns:
+        - status
+        - weather
+        - job
+        - last-success
+        - last-failure
+        - last-duration
+        - build-button
