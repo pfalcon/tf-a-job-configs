@@ -1,0 +1,67 @@
+- scm:
+    name: tf-a-ci-scripts
+    scm:
+        - git:
+            url: https://git.trustedfirmware.org/ci/tf-a-ci-scripts.git
+            refspec: +refs/heads/master:refs/remotes/origin/master
+            name: origin
+            branches:
+                - refs/heads/master
+            basedir: tf-a-ci-scripts
+            skip-tag: true
+            shallow-clone: true
+            wipe-workspace: false
+- scm:
+    name: trusted-firmware-a
+    scm:
+        - git:
+            url: https://git.trustedfirmware.org/TF-A/trusted-firmware-a.git
+            refspec: +refs/heads/master:refs/remotes/origin/master
+            name: origin
+            branches:
+                - refs/heads/master
+            basedir: trusted-firmware-a
+            skip-tag: true
+            shallow-clone: true
+            wipe-workspace: false
+- scm:
+    name: tf-a-tests
+    scm:
+        - git:
+            url: https://git.trustedfirmware.org/TF-A/tf-a-tests.git
+            refspec: +refs/heads/master:refs/remotes/origin/master
+            name: origin
+            branches:
+                - refs/heads/master
+            basedir: tf-a-tests
+            skip-tag: true
+            shallow-clone: true
+            wipe-workspace: false
+- job:
+    name: tf-a-builder
+    project-type: freestyle
+    defaults: global
+    properties:
+        - build-discarder:
+            days-to-keep: 90
+            num-to-keep: 90
+    parameters:
+        - string:
+            name: test_groups
+            default: 'tf-l1-build-fvp/fvp-default:nil'
+    disabled: false
+    node: docker-amd64-xenial
+    display-name: 'Trusted Firmware A (TF-A) builder'
+    scm:
+        - tf-a-ci-scripts
+        - trusted-firmware-a
+        - tf-a-tests
+    wrappers:
+        - timestamps
+    builders:
+        - shell:
+            !include-raw: tf-a-builder/builders.sh
+    publishers:
+        - archive:
+            artifacts: 'artefacts/**'
+            latest-only: false
