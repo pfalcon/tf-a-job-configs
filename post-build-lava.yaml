@@ -1,0 +1,38 @@
+- job:
+    name: post-build-lava
+    project-type: freestyle
+    defaults: global
+    properties:
+        - build-discarder:
+            days-to-keep: 365
+            num-to-keep: 700
+    parameters:
+        - file:
+            name: post_build_lava_parameters
+        - bool:
+            name: SKIP_REPORT
+            default: true
+        - string:
+            name: LAVA_SERVER
+            default: 'tf.validation.linaro.org/RPC2/'
+    disabled: false
+    node: master
+    display-name: 'Post build to LAVA'
+    wrappers:
+        - timestamps
+        - credentials-binding:
+            - text:
+                credential-id: LAVA_USER_TF
+                variable: LAVA_USER
+        - credentials-binding:
+            - text:
+                credential-id: LAVA_TOKEN_TF
+                variable: LAVA_TOKEN
+    builders:
+        - shell:
+            !include-raw: post-build-lava/builders.sh
+    publishers:
+        - groovy-postbuild:
+            script:
+                !include-raw:
+                  - post-build-lava/post-build-lava.groovy
