@@ -1,0 +1,31 @@
+- job:
+    name: trigger-tf-a-builder
+    project-type: freestyle
+    defaults: global
+    properties:
+        - build-discarder:
+            days-to-keep: 180
+            num-to-keep: 180
+    disabled: false
+    node: master
+    display-name: 'Trigger for TF-A gerrit events'
+    triggers:
+        - gerrit:
+            server-name: 'review.trustedfirmware.org'
+            trigger-on:
+                - patchset-created-event
+            projects:
+                - project-compare-type: 'PLAIN'
+                  project-pattern: 'TF-A/trusted-firmware-a'
+                  branches:
+                    - branch-pattern: 'master'
+            silent-start: true
+    wrappers:
+        - timestamps
+    builders:
+        - shell: |
+            #!/bin/bash
+
+            set -e
+
+            env |grep GERRIT_
