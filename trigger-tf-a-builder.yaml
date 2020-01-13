@@ -18,7 +18,7 @@
                 - project-compare-type: 'PLAIN'
                   project-pattern: 'TF-A/trusted-firmware-a'
                   branches:
-                    - branch-pattern: 'master'
+                    - branch-pattern: 'integration'
             silent-start: true
     wrappers:
         - timestamps
