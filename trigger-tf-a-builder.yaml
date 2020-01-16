@@ -35,8 +35,8 @@
             echo "########################################################################"
 
             cat << EOF > tf_a_builder_parameters
-            GERRIT_BRANCH=${GERRIT_BRANCH}
             GERRIT_PROJECT=${GERRIT_PROJECT}
+            GERRIT_BRANCH=${GERRIT_BRANCH}
             GERRIT_REFSPEC=${GERRIT_REFSPEC}
             test_groups=tf-l1-build-juno/juno-default:nil
             EOF

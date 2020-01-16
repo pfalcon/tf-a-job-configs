@@ -49,6 +49,15 @@
         - string:
             name: test_groups
             default: 'tf-l1-build-juno/juno-default:nil'
+        - string:
+            name: GERRIT_PROJECT
+            default: 'TF-A/trusted-firmware-a'
+        - string:
+            name: GERRIT_BRANCH
+            default: 'integration'
+        - string:
+            name: GERRIT_REFSPEC
+            default: 'refs/heads/master'
     disabled: false
     node: docker-amd64-xenial
     display-name: 'Trusted Firmware A (TF-A) builder'
