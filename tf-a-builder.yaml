@@ -15,11 +15,11 @@
     name: trusted-firmware-a
     scm:
         - git:
-            url: https://git.trustedfirmware.org/TF-A/trusted-firmware-a.git
-            refspec: +refs/heads/master:refs/remotes/origin/master
+            url: https://review.trustedfirmware.org/${GERRIT_PROJECT}
+            refspec: ${GERRIT_REFSPEC}
             name: origin
             branches:
-                - refs/heads/master
+                - ${GERRIT_BRANCH}
             basedir: trusted-firmware-a
             skip-tag: true
             shallow-clone: true
@@ -48,7 +48,7 @@
     parameters:
         - string:
             name: test_groups
-            default: 'tf-l1-build-fvp/fvp-default:nil'
+            default: 'tf-l1-build-juno/juno-default:nil'
     disabled: false
     node: docker-amd64-xenial
     display-name: 'Trusted Firmware A (TF-A) builder'

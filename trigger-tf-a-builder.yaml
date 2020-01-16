@@ -19,7 +19,7 @@
                   project-pattern: 'TF-A/trusted-firmware-a'
                   branches:
                     - branch-pattern: 'integration'
-            silent-start: true
+            silent: true
     wrappers:
         - timestamps
     builders:
@@ -28,4 +28,19 @@
 
             set -e
 
-            env |grep GERRIT_
+            echo ""
+            echo "########################################################################"
+            echo "    Gerrit Environment"
+            env |grep '^GERRIT'
+            echo "########################################################################"
+
+            cat << EOF > tf_a_builder_parameters
+            GERRIT_BRANCH=${GERRIT_BRANCH}
+            GERRIT_PROJECT=${GERRIT_PROJECT}
+            GERRIT_REFSPEC=${GERRIT_REFSPEC}
+            test_groups=tf-l1-build-juno/juno-default:nil
+            EOF
+        - trigger-builds:
+            - project: tf-a-builder
+              property-file: tf_a_builder_parameters
+              block: true
