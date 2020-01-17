@@ -70,6 +70,31 @@
     builders:
         - shell:
             !include-raw: tf-a-builder/builders.sh
+        - shell:  |
+            #!/bin/bash
+
+            set -e
+
+            rm -rf configs
+            git clone --depth 1 https://git.trustedfirmware.org/ci/tf-a-job-configs.git configs
+
+            sed -e "s|\${GERRIT_PROJECT}|${GERRIT_PROJECT}|" \
+                -e "s|\${GERRIT_BRANCH}|${GERRIT_BRANCH}|" \
+                -e "s|\${GERRIT_REFSPEC}|${GERRIT_REFSPEC}|" \
+                -e "s|\${test_groups}|${test_groups}|" \
+                -e "s|\${BUILD_URL}|${BUILD_URL}|" \
+                < configs/tf-a-builder/lava-job-definitions/juno/template.yaml \
+                > custom_lava_job_definition.yaml
+
+            cat << EOF > ${WORKSPACE}/post_build_lava_parameters
+            DEVICE_TYPE=juno
+            CUSTOM_YAML_URL=${JOB_URL}/ws/custom_lava_job_definition.yaml
+            LAVA_SERVER=tf.validation.linaro.org/RPC2/
+            EOF
+        - trigger-builds:
+            - project: 'post-build-lava'
+              property-file: post_build_lava_parameters
+              block: true
     publishers:
         - archive:
             artifacts: 'artefacts/**'
