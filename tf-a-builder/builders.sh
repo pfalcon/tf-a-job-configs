@@ -3,6 +3,11 @@
 sudo apt update -q=2
 sudo apt install -q=2 --yes --no-install-recommends build-essential device-tree-compiler git libssl-dev
 
+# FIXME workaround clone_repos.sh script when using gerrit
+unset GERRIT_PROJECT
+unset GERRIT_BRANCH
+unset GERRIT_REFSPEC
+
 set -ex
 
 if [ -z "${WORKSPACE}" ]; then
