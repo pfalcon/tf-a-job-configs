@@ -54,7 +54,7 @@
             default: 'TF-A/trusted-firmware-a'
         - string:
             name: GERRIT_BRANCH
-            default: 'integration'
+            default: 'master'
         - string:
             name: GERRIT_REFSPEC
             default: 'refs/heads/master'
