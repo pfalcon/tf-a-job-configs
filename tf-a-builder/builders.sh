@@ -42,8 +42,8 @@ mkdir -p \
   ${WORKSPACE}/nfs/downloads/linaro/18.04 \
   ${WORKSPACE}/nfs/downloads/mbedtls
 cd ${WORKSPACE}/nfs/downloads/linaro/18.04
-curl -sLSO -C - https://releases.linaro.org/openembedded/juno-lsk/15.09/lt-vexpress64-openembedded_minimal-armv8-gcc-4.9_20150912-729.img.gz
-curl -sLSO -C - https://releases.linaro.org/openembedded/aarch64/17.01/linaro-image-minimal-genericarmv8-20170127-888.rootfs.tar.gz
+#curl -sLSO -C - https://releases.linaro.org/openembedded/juno-lsk/15.09/lt-vexpress64-openembedded_minimal-armv8-gcc-4.9_20150912-729.img.gz
+#curl -sLSO -C - https://releases.linaro.org/openembedded/aarch64/17.01/linaro-image-minimal-genericarmv8-20170127-888.rootfs.tar.gz
 wget -q -c -m -A .zip -np -nd https://releases.linaro.org/members/arm/platforms/19.06/
 for file in $(ls *.zip); do
   unzip -q ${file} -d $(basename ${file} .zip)
