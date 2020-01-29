@@ -37,17 +37,17 @@ actions:
       compression: zip
 
 - deploy:
-    namespace: debian
+    namespace: target
     timeout:
       minutes: 2
     to: nfs
     os: debian
     nfsrootfs:
-      url: http://images.validation.linaro.org/juno/debian-jessie-arm64-rootfs.tar.gz
+      url: http://releases.linaro.org/openembedded/aarch64/17.01/linaro-image-minimal-genericarmv8-20170127-888.rootfs.tar.gz
       compression: gz
 
 - boot:
-    namespace: debian
+    namespace: target
     connection-namespace: recovery
     method: u-boot
     commands: norflash
@@ -56,17 +56,6 @@ actions:
       username: root
     prompts:
     - root@(.*):~#
-
-- test:
-    namespace: debian
-    connection-namespace: recovery
-    timeout:
-      minutes: 5
-    definitions:
-    - repository: http://git.linaro.org/lava-team/lava-functional-tests.git
-      from: git
-      path: lava-test-shell/smoke-tests-basic.yaml
-      name: smoke-tests
 
 metadata:
   gerrit project: ${GERRIT_PROJECT}
