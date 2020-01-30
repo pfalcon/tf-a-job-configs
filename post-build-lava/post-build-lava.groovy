@@ -48,15 +48,6 @@ if (matcher?.matches()) {
     updatedAction = action.createUpdated(parameters)
     manager.build.replaceAction(updatedAction)
 
-    // Update the pool of jobs to monitor
-    job = hudson.model.Hudson.instance.getItem("check-lava-status")
-    property = job.getProperty(hudson.model.ParametersDefinitionProperty.class)
-    parameter = property.getParameterDefinition("LAVA_JOB_ID_POOL")
-    lavaJobIdPool = parameter.getDefaultValue()
-    lavaJobIdPool += " ${manager.build.number}"
-    parameter.setDefaultValue(lavaJobIdPool)
-    job.save()
-
     // Call post-build-report with parameters file
     def skipReport = manager.build.getEnvironment(manager.listener)['SKIP_REPORT']
     if (!skipReport.toBoolean()) {
