@@ -19,7 +19,8 @@
                   project-pattern: 'TF-A/trusted-firmware-a'
                   branches:
                     - branch-pattern: 'integration'
-            silent: true
+            silent: false
+            silent-start: true
     wrappers:
         - timestamps
     builders:
