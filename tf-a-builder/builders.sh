@@ -49,7 +49,7 @@ for file in $(ls *.zip); do
   unzip -q ${file} -d $(basename ${file} .zip)
 done
 cd ${WORKSPACE}/nfs/downloads/mbedtls
-curl -sLSO -C - https://tls.mbed.org/download/start/mbedtls-2.16.0-apache.tgz
+curl -sLSO -k -C - https://tls.mbed.org/download/start/mbedtls-2.16.0-apache.tgz
 cp -a mbedtls-2.16.0-apache.tgz mbedtls-2.16.0.tar.gz
 
 cd ${WORKSPACE}
