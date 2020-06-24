@@ -81,5 +81,7 @@
             check-script: "script/static-checks/static-checks-cppcheck.sh"
         - arm-checks:
             check-script: "script/static-checks/static-checks.sh"
+        - tf-coverity:
+            check-script: "script/tf-coverity/run_coverity_on_tf.py --tf $(pwd)"
     jobs:
     - '{name}-{static}'
