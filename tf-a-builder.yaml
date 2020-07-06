@@ -47,6 +47,9 @@
             num-to-keep: 90
     parameters:
         - string:
+            name: import_cc
+            default: '1'
+        - string:
             name: test_groups
             default: 'tf-l1-build-juno/juno-default:nil'
         - string:
