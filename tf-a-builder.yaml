@@ -43,8 +43,8 @@
     defaults: global
     properties:
         - build-discarder:
-            days-to-keep: 90
-            num-to-keep: 90
+            days-to-keep: 180
+            num-to-keep: 180
     parameters:
         - string:
             name: import_cc

@@ -3,8 +3,8 @@
     gerrit-project: 'TF-A/trusted-firmware-a'
     gerrit-branch: 'master'
     gerrit-refspec: 'refs/heads/master'
-    days-to-keep: '90'
-    num-to-keep: '90'
+    days-to-keep: '180'
+    num-to-keep: '180'
     exec-node: 'docker-amd64-xenial'
 
 - scm:
