@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -ex
+
 sudo apt update -q=2
 sudo apt install -q=2 --yes --no-install-recommends build-essential device-tree-compiler git libssl-dev
 
@@ -8,46 +10,44 @@ unset GERRIT_PROJECT
 unset GERRIT_BRANCH
 unset GERRIT_REFSPEC
 
-set -ex
-
 if [ -z "${WORKSPACE}" ]; then
   ## Local build
   export WORKSPACE=${PWD}
 fi
 
 # Toolchain from Arm Developer page: https://developer.arm.com/open-source/gnu-toolchain/gnu-a/downloads
-TC_URL="https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-a/8.3-2019.03/binrel"
-# Toolchain from Linaro Releases: https://releases.linaro.org/components/toolchain/binaries
-#TC_URL="https://releases.linaro.org/components/toolchain/binaries/6.2-2016.11/aarch64-linux-gnu/gcc-linaro-6.2.1-2016.11-x86_64_aarch64-linux-gnu.tar.xz"
-#TC_URL="https://releases.linaro.org/components/toolchain/binaries/6.2-2016.11/arm-linux-gnueabihf/gcc-linaro-6.2.1-2016.11-x86_64_arm-linux-gnueabihf.tar.xz"
+TC_VERSION="9.2-2019.12"
+TC_URL="https://developer.arm.com/-/media/Files/downloads/gnu-a/${TC_VERSION}/binrel"
+TC_AARCH64="gcc-arm-${TC_VERSION}-x86_64-aarch64-none-elf.tar.xz"
+TC_ARM="gcc-arm-${TC_VERSION}-x86_64-arm-none-eabi.tar.xz"
 
-# AArch64 little-endian (aarch64-linux-gnu) compiler
-cd ${WORKSPACE}
-curl -sLSO -C - ${TC_URL}/gcc-arm-8.3-2019.03-x86_64-aarch64-linux-gnu.tar.xz
-tar -Jxf gcc-arm-*-x86_64-aarch64-linux-gnu.tar.xz
-cd ${WORKSPACE}/gcc-arm-*-x86_64-aarch64-linux-gnu/bin
-export PATH=${PWD}:${PATH}
-aarch64-linux-gnu-gcc --version
+# install toolchains
+for TC in ${TC_AARCH64} ${TC_ARM}; do
+    cd ${WORKSPACE}
+    curl -sLSO -C - ${TC_URL}/${TC}
+    tar -Jxf ${TC}
+    cd ${WORKSPACE}/${TC%.tar.xz}/bin
+    export PATH=${PWD}:${PATH}
+done
 
-# AArch32 bare-metal (arm-eabi) compiler
-cd ${WORKSPACE}
-curl -sLSO -C - ${TC_URL}/gcc-arm-8.3-2019.03-x86_64-arm-eabi.tar.xz
-tar -Jxf gcc-arm-*-x86_64-arm-eabi.tar.xz
-cd ${WORKSPACE}/gcc-arm-*-x86_64-arm-eabi/bin
-export PATH=${PWD}:${PATH}
-arm-eabi-gcc --version
+# Basic TC checks
+for param in -dumpmachine --version -v; do
+    aarch64-none-elf-gcc ${param}
+    arm-none-eabi-gcc ${param}
+done
 
 # Additional binaries required (rootfs, etc...)
+LINARO_VERSION=19.06
 mkdir -p \
-  ${WORKSPACE}/nfs/downloads/linaro/18.04 \
+  ${WORKSPACE}/nfs/downloads/linaro/${LINARO_VERSION} \
   ${WORKSPACE}/nfs/downloads/mbedtls
-cd ${WORKSPACE}/nfs/downloads/linaro/18.04
-#curl -sLSO -C - https://releases.linaro.org/openembedded/juno-lsk/15.09/lt-vexpress64-openembedded_minimal-armv8-gcc-4.9_20150912-729.img.gz
-#curl -sLSO -C - https://releases.linaro.org/openembedded/aarch64/17.01/linaro-image-minimal-genericarmv8-20170127-888.rootfs.tar.gz
-wget -q -c -m -A .zip -np -nd https://releases.linaro.org/members/arm/platforms/19.06/
-for file in $(ls *.zip); do
+
+cd ${WORKSPACE}/nfs/downloads/linaro/${LINARO_VERSION}
+wget -q -c -m -A .zip -np -nd https://releases.linaro.org/members/arm/platforms/${LINARO_VERSION}/
+for file in *.zip; do
   unzip -q ${file} -d $(basename ${file} .zip)
 done
+
 cd ${WORKSPACE}/nfs/downloads/mbedtls
 curl -sLSO -k -C - https://tls.mbed.org/download/start/mbedtls-2.16.0-apache.tgz
 cp -a mbedtls-2.16.0-apache.tgz mbedtls-2.16.0.tar.gz
