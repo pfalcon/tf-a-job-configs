@@ -2,6 +2,60 @@
 
 set -ex
 
+# Toolchains from Linaro Releases: https://releases.linaro.org/components/toolchain/binaries
+function install-linaro-toolchains() {
+    local TC_VERSION="6.2-2016.11"
+    local TC_FULL_VERSION="6.2.1-2016.11"
+    local TC_URL="https://releases.linaro.org/components/toolchain/binaries/${TC_VERSION}"
+    local TC_AARCH64="gcc-linaro-${TC_FULL_VERSION}-x86_64_aarch64-linux-gnu.tar.xz"
+
+    # Install toolchains
+    for TC in ${TC_AARCH64}; do
+        cd ${WORKSPACE}
+        case $TC in
+            *aarch64-linux-gnu*)
+                TC_URL_INFIX=aarch64-linux-gnu
+                ;;
+            *)
+                echo "Invalid Toolchain \"$TC\" and not appended in PATH"
+                continue
+                ;;
+        esac
+        curl -sLSO -C - ${TC_URL}/${TC_URL_INFIX}/${TC}
+        tar -Jxf ${TC}
+        cd ${WORKSPACE}/${TC%.tar.xz}/bin
+        export PATH=${PWD}:${PATH}
+    done
+
+    # Basic TC checks
+    for param in -dumpmachine --version -v; do
+        aarch64-linux-gnu-gcc ${param}
+    done
+}
+
+# Toolchains from Arm Developer page: https://developer.arm.com/open-source/gnu-toolchain/gnu-a/downloads
+function install-arm-toolchains() {
+    local TC_VERSION="9.2-2019.12"
+    local TC_URL="https://developer.arm.com/-/media/Files/downloads/gnu-a/${TC_VERSION}/binrel"
+    local TC_AARCH64="gcc-arm-${TC_VERSION}-x86_64-aarch64-none-elf.tar.xz"
+    local TC_ARM="gcc-arm-${TC_VERSION}-x86_64-arm-none-eabi.tar.xz"
+
+    # Install toolchains
+    for TC in ${TC_AARCH64} ${TC_ARM}; do
+        cd ${WORKSPACE}
+        curl -sLSO -C - ${TC_URL}/${TC}
+        tar -Jxf ${TC}
+        cd ${WORKSPACE}/${TC%.tar.xz}/bin
+        export PATH=${PWD}:${PATH}
+    done
+
+    # Basic TC checks
+    for param in -dumpmachine --version -v; do
+        aarch64-none-elf-gcc ${param}
+        arm-none-eabi-gcc ${param}
+    done
+}
+
 sudo apt update -q=2
 sudo apt install -q=2 --yes --no-install-recommends build-essential device-tree-compiler git libssl-dev
 
@@ -15,26 +69,9 @@ if [ -z "${WORKSPACE}" ]; then
   export WORKSPACE=${PWD}
 fi
 
-# Toolchain from Arm Developer page: https://developer.arm.com/open-source/gnu-toolchain/gnu-a/downloads
-TC_VERSION="9.2-2019.12"
-TC_URL="https://developer.arm.com/-/media/Files/downloads/gnu-a/${TC_VERSION}/binrel"
-TC_AARCH64="gcc-arm-${TC_VERSION}-x86_64-aarch64-none-elf.tar.xz"
-TC_ARM="gcc-arm-${TC_VERSION}-x86_64-arm-none-eabi.tar.xz"
-
-# install toolchains
-for TC in ${TC_AARCH64} ${TC_ARM}; do
-    cd ${WORKSPACE}
-    curl -sLSO -C - ${TC_URL}/${TC}
-    tar -Jxf ${TC}
-    cd ${WORKSPACE}/${TC%.tar.xz}/bin
-    export PATH=${PWD}:${PATH}
-done
-
-# Basic TC checks
-for param in -dumpmachine --version -v; do
-    aarch64-none-elf-gcc ${param}
-    arm-none-eabi-gcc ${param}
-done
+# Install toolchains
+install-linaro-toolchains
+install-arm-toolchains
 
 # Additional binaries required (rootfs, etc...)
 LINARO_VERSION=19.06
