@@ -5,7 +5,7 @@
     gerrit-refspec: 'refs/heads/master'
     days-to-keep: '180'
     num-to-keep: '180'
-    exec-node: 'docker-amd64-xenial'
+    exec-node: 'docker-amd64-bionic'
 
 - scm:
     name: tf-a-ci-scripts

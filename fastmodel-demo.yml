@@ -11,7 +11,7 @@
             days-to-keep: 30
             num-to-keep: 30
     disabled: false
-    node: docker-amd64-xenial
+    node: docker-amd64-bionic
     display-name: 'Demo howto use fastmodel'
     wrappers:
         - timestamps

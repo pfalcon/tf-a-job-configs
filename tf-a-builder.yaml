@@ -62,7 +62,7 @@
             name: GERRIT_REFSPEC
             default: 'refs/heads/master'
     disabled: false
-    node: docker-amd64-xenial
+    node: docker-amd64-bionic
     display-name: 'Trusted Firmware A (TF-A) builder'
     scm:
         - tf-a-ci-scripts
