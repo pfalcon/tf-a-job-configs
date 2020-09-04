@@ -6,6 +6,10 @@
         - build-discarder:
             days-to-keep: 180
             num-to-keep: 180
+        - authorization:
+            anonymous:
+              - job-read
+              - job-extended-read
     disabled: false
     node: master
     display-name: 'Trigger for TF-A gerrit events'

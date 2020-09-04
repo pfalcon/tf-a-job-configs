@@ -45,6 +45,10 @@
         - build-discarder:
             days-to-keep: 180
             num-to-keep: 180
+        - authorization:
+            anonymous:
+              - job-read
+              - job-extended-read
     parameters:
         - string:
             name: import_cc
