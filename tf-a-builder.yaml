@@ -47,8 +47,10 @@
             num-to-keep: 180
         - authorization:
             anonymous:
+              - job-discover
               - job-read
               - job-extended-read
+              - job-workspace
     parameters:
         - string:
             name: import_cc
