@@ -29,7 +29,7 @@
             gerrit-build-successful-verified-value: 0
             gerrit-build-failed-verified-value: 0
             gerrit-build-successful-codereview-value: 0
-            gerrit-build-successful-verified-value: 0
+            gerrit-build-failed-codereview-value: 0
     wrappers:
         - timestamps
     builders:
