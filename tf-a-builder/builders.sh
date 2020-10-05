@@ -2,62 +2,6 @@
 
 set -ex
 
-# Toolchains from Linaro Releases: https://releases.linaro.org/components/toolchain/binaries
-function install-linaro-toolchains() {
-    local TC_VERSION="6.2-2016.11"
-    local TC_FULL_VERSION="6.2.1-2016.11"
-    local TC_URL="https://releases.linaro.org/components/toolchain/binaries/${TC_VERSION}"
-    local TC_AARCH64="gcc-linaro-${TC_FULL_VERSION}-x86_64_aarch64-linux-gnu.tar.xz"
-
-    # Install toolchains
-    for TC in ${TC_AARCH64}; do
-        cd ${WORKSPACE}
-        case $TC in
-            *aarch64-linux-gnu*)
-                TC_URL_INFIX=aarch64-linux-gnu
-                ;;
-            *)
-                echo "Invalid Toolchain \"$TC\" and not appended in PATH"
-                continue
-                ;;
-        esac
-        curl -sLSO -C - ${TC_URL}/${TC_URL_INFIX}/${TC}
-        tar -Jxf ${TC}
-        cd ${WORKSPACE}/${TC%.tar.xz}/bin
-        export PATH=${PWD}:${PATH}
-    done
-
-    # Basic TC checks
-    for param in -dumpmachine --version -v; do
-        aarch64-linux-gnu-gcc ${param}
-    done
-}
-
-# Toolchains from Arm Developer page: https://developer.arm.com/open-source/gnu-toolchain/gnu-a/downloads
-function install-arm-toolchains() {
-    local TC_VERSION="9.2-2019.12"
-    local TC_URL="https://developer.arm.com/-/media/Files/downloads/gnu-a/${TC_VERSION}/binrel"
-    local TC_AARCH64="gcc-arm-${TC_VERSION}-x86_64-aarch64-none-elf.tar.xz"
-    local TC_ARM="gcc-arm-${TC_VERSION}-x86_64-arm-none-eabi.tar.xz"
-
-    # Install toolchains
-    for TC in ${TC_AARCH64} ${TC_ARM}; do
-        cd ${WORKSPACE}
-        curl -sLSO -C - ${TC_URL}/${TC}
-        tar -Jxf ${TC}
-        cd ${WORKSPACE}/${TC%.tar.xz}/bin
-        export PATH=${PWD}:${PATH}
-    done
-
-    # Basic TC checks
-    for param in -dumpmachine --version -v; do
-        aarch64-none-elf-gcc ${param}
-        arm-none-eabi-gcc ${param}
-    done
-}
-
-sudo apt update -q=2
-sudo apt install -q=2 --yes --no-install-recommends build-essential device-tree-compiler git libssl-dev
 
 # FIXME workaround clone_repos.sh script when using gerrit
 unset GERRIT_PROJECT
@@ -69,33 +13,90 @@ if [ -z "${WORKSPACE}" ]; then
   export WORKSPACE=${PWD}
 fi
 
-# Install toolchains
-install-linaro-toolchains
-install-arm-toolchains
-
-# Additional binaries required (rootfs, etc...)
-LINARO_VERSION=20.01
-mkdir -p \
-  ${WORKSPACE}/nfs/downloads/linaro/${LINARO_VERSION} \
-  ${WORKSPACE}/nfs/downloads/mbedtls
-
-cd ${WORKSPACE}/nfs/downloads/linaro/${LINARO_VERSION}
-wget -q -c -m -A .zip -np -nd https://releases.linaro.org/members/arm/platforms/${LINARO_VERSION}/
-for file in *.zip; do
-  unzip -q ${file} -d $(basename ${file} .zip)
-done
-
-cd ${WORKSPACE}/nfs/downloads/mbedtls
-curl -sLSO -k -C - https://tls.mbed.org/download/start/mbedtls-2.16.0-apache.tgz
-cp -a mbedtls-2.16.0-apache.tgz mbedtls-2.16.0.tar.gz
-
 cd ${WORKSPACE}
+
+# Several test descriptions are pending to be included in OpenCI, so for the moment
+# blocklist these.
+blocklist="blocklist.txt"
+cat << EOF > "${blocklist}"
+coverity-tf-misra
+tf-l2-boot-tests-juno%juno-tbb-mbedtls-romlib,juno-default,nil,nil:juno-tftf-romlib
+EOF
+
+if echo "${TEST_DESC}" | grep -f ${blocklist} - ; then
+    echo ${TEST_DESC} is blocklisted
+    exit 0
+fi
+
+mkdir -p ${WORKSPACE}/nfs/downloads/mbedtls
+cd ${WORKSPACE}/nfs/downloads/mbedtls
+curl --connect-timeout 5 --retry 5 --retry-delay 1 -sLSO -k -C - ${MBEDTLS_URL}
+export mbedtls_archive=${WORKSPACE}/nfs/downloads/mbedtls/$(ls -1 mbedtls-*.tar.gz)
 
 # Path to root of CI repository
 ci_root="${WORKSPACE}/tf-a-ci-scripts"
 
+# FIXME: node bionic-amd64-tf-a-build does not set correctly PATH=$TOOLS_DIR/bin:$PATH
+TOOLS_DIR=/home/buildslave/tools
+export PATH=${TOOLS_DIR}/bin:${PATH}
+
+export tfa_downloads="https://downloads.trustedfirmware.org/tf-a"
+
+# Fetch required firmware/binaries and place it at proper location
 export nfs_volume="${WORKSPACE}/nfs"
-export tfa_downloads="file://${nfs_volume}/downloads"
+project_filer="${nfs_volume}/projectscratch/ssg/trusted-fw"
+for d in spm spm-10-23-2020; do
+    mkdir -p ${project_filer}/ci-files/$d
+    cd ${project_filer}/ci-files/$d
+    curl --connect-timeout 5 --retry 5 --retry-delay 1 -fsSLo \
+	 download.json \
+	 ${tfa_downloads}/$d/?export=json
+    for f in $(cat download.json | jq .files[].Url | sed s/\"//g); do
+        curl --connect-timeout 5 --retry 5 --retry-delay 1 -fsSLo  $(basename $f) $f
+    done
+done
+
+# FIXME: place below code in above loop
+# fetch https://downloads.trustedfirmware.org/tf-a/dummy-crypto-lib.tar
+cd ${project_filer}
+curl --connect-timeout 5 --retry 5 --retry-delay 1 -fsSLo \
+     dummy-crypto-lib.tar \
+     https://downloads.trustedfirmware.org/tf-a/dummy-crypto-lib.tar
+tar xf dummy-crypto-lib.tar
+
+# fetch Juno rootfs, required by fvp
+linaro_2001_release="/nfs/downloads/linaro/20.01"
+cd ${linaro_2001_release}
+curl --connect-timeout 5 --retry 5 --retry-delay 1 -fsSLo \
+     lt-vexpress64-openembedded_minimal-armv8-gcc-5.2_20170127-761.img.gz \
+     https://releases.linaro.org/openembedded/juno-lsk/latest/lt-vexpress64-openembedded_minimal-armv8-gcc-5.2_20170127-761.img.gz
+
+# FIXME: create temporal /arm softlinks.
+# Reason behind is described at
+#        https://git.trustedfirmware.org/ci/dockerfiles.git/commit/?id=4e2c2c94e434bc8a9b25f5da7c6018a43db8cb2f
+
+# /arm/pdsw/downloads/scp-models/tools/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-gcc
+mkdir -p /arm/pdsw/downloads/scp-models/tools/gcc-arm-none-eabi-9-2020-q2-update
+ln -s \
+   ${TOOLS_DIR}/bin \
+   /arm/pdsw/downloads/scp-models/tools/gcc-arm-none-eabi-9-2020-q2-update/bin
+
+# /arm/projectscratch/ssg/trusted-fw/dummy-crypto-lib
+mkdir -p /arm/projectscratch/ssg/trusted-fw
+ln -s \
+   ${project_filer}/dummy-crypto-lib \
+   /arm/projectscratch/ssg/trusted-fw/dummy-crypto-lib
+
+
+# /arm/pdsw/tools/gcc-linaro-6.2.1-2016.11-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
+mkdir -p /arm/pdsw/tools/gcc-linaro-6.2.1-2016.11-x86_64_aarch64-linux-gnu
+ln -s ${TOOLS_DIR}/gcc-linaro-6.2.1-2016.11-x86_64_aarch64-linux-gnu/bin \
+   /arm/pdsw/tools/gcc-linaro-6.2.1-2016.11-x86_64_aarch64-linux-gnu/bin
+
+# CC=/arm/warehouse/Distributions/FA/ARMCompiler/6.8/25/standalone-linux-x86_64-rel/bin/armclang
+mkdir -p /arm/warehouse/Distributions/FA/ARMCompiler/6.8/25/standalone-linux-x86_64-rel
+ln -s ${TOOLS_DIR}/armclang-6.8/bin \
+      /arm/warehouse/Distributions/FA/ARMCompiler/6.8/25/standalone-linux-x86_64-rel/bin
 
 # Mandatory workspace
 export workspace="${workspace:-${WORKSPACE}/workspace}"
@@ -115,11 +116,50 @@ export tftf_root="${tftf_root:-${WORKSPACE}/tf-a-tests}"
 # automation.
 export test_run="${test_run:-1}"
 
+# By default, do not execute any run
+export skip_runs="${skip_runs:-1}"
+
+# set linaro platform release folder
+export linaro_2001_release="file://${linaro_2001_release}"
+
+export docker_registry="${DOCKER_REGISTRY}"
+export armlmd_license_file="${ARMLMD_LICENSE_FILE}"
+export juno_rootfs_url="${JUNO_ROOTFS_URL}"
+
+# Parse TEST_DESC and export test_group & tf_config and & run_config
+test_desc="${test_desc:-$TEST_DESC}"
+test_desc="${test_desc:?}"
+
+# Strip test suffix
+test_desc="${test_desc%%.test}"
+
+lhs="$(echo "$test_desc" | awk -F: '{print $1}')"
+rhs="$(echo "$test_desc" | awk -F: '{print $2}')"
+
+export test_group="$(echo "$lhs" | awk -F% '{print $2}')"
+
+# Test descriptors are always generated in the following order:
+#  tf_config, tftf_config, scp_config, scp_tools
+build_config="$(echo "$lhs" | awk -F% '{print $3}')"
+export tf_config="$(echo "${build_config}" | awk -F, '{print $1}')"
+export tftf_config="$(echo "${build_config}" | awk -F, '{print $2}')"
+export scp_config="$(echo "${build_config}" | awk -F, '{print $3}')"
+export scp_tools="$(echo "${build_config}" | awk -F, '{print $4}')"
+
+export run_config="${rhs%.test}"
+
 # Run this script bash -x, and it gets passed downstream for debugging
 if echo "$-" | grep -q "x"; then
   bash_opts="-x"
 fi
 
 bash $bash_opts "$ci_root/script/run_local_ci.sh"
+
+# compress rootfs.bin file
+for a in $(find ${workspace} -type d -name artefacts); do
+    for r in $(find $a -type f -name rootfs.bin); do
+	d=$(dirname $r); b=$(basename $r); cd "$d" && gzip "$b"
+    done
+done
 
 cp -a $(find ${workspace} -type d -name artefacts) ${WORKSPACE}/

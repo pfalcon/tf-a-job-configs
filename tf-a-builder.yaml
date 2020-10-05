@@ -15,61 +15,97 @@
     name: trusted-firmware-a
     scm:
         - git:
-            url: https://review.trustedfirmware.org/${GERRIT_PROJECT}
-            refspec: ${GERRIT_REFSPEC}
+            url: https://review.trustedfirmware.org/${TF_GERRIT_PROJECT}
+            refspec: ${TF_GERRIT_REFSPEC}
             name: origin
             branches:
-                - ${GERRIT_BRANCH}
+                - ${TF_GERRIT_BRANCH}
             basedir: trusted-firmware-a
             skip-tag: true
-            shallow-clone: true
+            shallow-clone: false
             wipe-workspace: false
 - scm:
     name: tf-a-tests
     scm:
         - git:
-            url: https://git.trustedfirmware.org/TF-A/tf-a-tests.git
-            refspec: +refs/heads/master:refs/remotes/origin/master
+            url: https://git.trustedfirmware.org/${TFTF_GERRIT_PROJECT}
+            refspec: ${TFTF_GERRIT_REFSPEC}
             name: origin
             branches:
-                - refs/heads/master
+                - ${TFTF_GERRIT_BRANCH}
             basedir: tf-a-tests
             skip-tag: true
-            shallow-clone: true
+            shallow-clone: false
             wipe-workspace: false
 - job:
     name: tf-a-builder
+    node: docker-amd64-tf-a-bionic
     project-type: freestyle
+    concurrent: true
+    disabled: false
     defaults: global
+    Description: |
+      Trusted Firmware A (TF-A) builder
     properties:
         - build-discarder:
             days-to-keep: 180
-            num-to-keep: 180
+            num-to-keep: 3000
         - authorization:
             anonymous:
               - job-discover
               - job-read
               - job-extended-read
               - job-workspace
+            lsandov1:
+              - job-read
+              - job-extended-read
+              - job-build
+              - job-cancel
+              - run-update
     parameters:
         - string:
             name: import_cc
-            default: '1'
         - string:
-            name: test_groups
-            default: 'tf-l1-build-juno/juno-default:nil'
+            name: TEST_DESC
         - string:
-            name: GERRIT_PROJECT
+            name: TF_GERRIT_PROJECT
             default: 'TF-A/trusted-firmware-a'
         - string:
-            name: GERRIT_BRANCH
-            default: 'master'
-        - string:
-            name: GERRIT_REFSPEC
+            name: TF_GERRIT_BRANCH
             default: 'refs/heads/master'
-    disabled: false
-    node: docker-amd64-tf-a-bionic
-    display-name: 'Trusted Firmware A (TF-A) builder'
+        - string:
+            name: TF_GERRIT_REFSPEC
+            default: '+refs/heads/master:refs/remotes/origin/master'
+        - string:
+            name: TFTF_GERRIT_PROJECT
+            default: 'TF-A/tf-a-tests'
+        - string:
+            name: TFTF_GERRIT_BRANCH
+            default: 'refs/heads/master'
+        - string:
+            name: TFTF_GERRIT_REFSPEC
+            default: '+refs/heads/master:refs/remotes/origin/master'
+        - string:
+            name: DOCKER_REGISTRY
+            default: '987685672616.dkr.ecr.us-east-1.amazonaws.com'
+        - string:
+            name: ARMLMD_LICENSE_FILE
+            default: '27000@ci.trustedfirmware.org'
+        - string:
+            name: JUNO_ROOTFS_URL
+            default: 'http://releases.linaro.org/openembedded/aarch64/17.01/linaro-image-minimal-genericarmv8-20170127-888.rootfs.tar.gz'
+        - string:
+            name: MBEDTLS_URL
+            default: 'https://github.com/ARMmbed/mbedtls/archive/mbedtls-2.24.0.tar.gz'
+        - bool:
+            name: ENABLE_STATIC_CHECK
+            default: false
+        - choice:
+            name: REPO_UNDER_STATIC_CHECK
+            choices:
+              - trusted-firmware-a
+              - tf-a-tests
+            default: trusted-firmware-a
     scm:
         - tf-a-ci-scripts
         - trusted-firmware-a
@@ -77,34 +113,50 @@
     wrappers:
         - timestamps
     builders:
+        - conditional-step:
+            condition-kind: boolean-expression
+            condition-expression: "${ENABLE_STATIC_CHECK}"
+            steps:
+              - shell: |-
+                  #!/bin/bash
+                  set -e
+                  export IS_CONTINUOUS_INTEGRATION=1
+                  cd ${WORKSPACE}/${REPO_UNDER_STATIC_CHECK}
+                  ${WORKSPACE}/tf-a-ci-scripts/script/static-checks/static-checks.sh
+                  mv "static-checks.log" "$WORKSPACE"
         - shell:
             !include-raw: tf-a-builder/builders.sh
-        - shell:  |
-            #!/bin/bash
+        - conditional-step:
+            condition-kind: file-exists
+            on-evaluation-failure: dont-run
+            condition-filename: artefacts/debug/job.yaml
+            condition-basedir: workspace
+            steps:
+            - shell:  |
+                #!/bin/bash
 
-            set -e
+                set -e
 
-            rm -rf configs
-            git clone --depth 1 https://git.trustedfirmware.org/ci/tf-a-job-configs.git configs
+                DEVICE_TYPE=fvp
+                CUSTOM_YAML_URL=${BUILD_URL}/artifact/artefacts/debug/job.yaml
+                DEVICE_TYPE=$(awk -F': ' '/device_type/ {print $2}' ${WORKSPACE}/artefacts/debug/job.yaml)
 
-            sed -e "s|\${GERRIT_PROJECT}|${GERRIT_PROJECT}|" \
-                -e "s|\${GERRIT_BRANCH}|${GERRIT_BRANCH}|" \
-                -e "s|\${GERRIT_REFSPEC}|${GERRIT_REFSPEC}|" \
-                -e "s|\${test_groups}|${test_groups}|" \
-                -e "s|\${BUILD_URL}|${BUILD_URL}|" \
-                < configs/tf-a-builder/lava-job-definitions/juno/template.yaml \
-                > custom_lava_job_definition.yaml
-
-            cat << EOF > ${WORKSPACE}/post_build_lava_parameters
-            DEVICE_TYPE=juno
-            CUSTOM_YAML_URL=${JOB_URL}/ws/custom_lava_job_definition.yaml
-            LAVA_SERVER=tf.validation.linaro.org/RPC2/
-            EOF
-        - trigger-builds:
-            - project: 'post-build-lava'
-              property-file: post_build_lava_parameters
-              block: true
+                cat << EOF > ${WORKSPACE}/post-build-lava.param
+                DEVICE_TYPE=${DEVICE_TYPE}
+                CUSTOM_YAML_URL=${CUSTOM_YAML_URL}
+                LAVA_SERVER=tf.validation.linaro.org/RPC2/
+                EOF
     publishers:
         - archive:
             artifacts: 'artefacts/**'
             latest-only: false
+            allow-empty: true
+        - conditional-publisher:
+          - condition-kind: file-exists
+            on-evaluation-failure: dont-run
+            condition-filename: artefacts/debug/job.yaml
+            condition-basedir: workspace
+            action:
+              - trigger-parameterized-builds:
+                  - project: post-build-lava
+                    property-file: post-build-lava.param

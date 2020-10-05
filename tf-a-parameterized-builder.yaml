@@ -1,0 +1,30 @@
+- job:
+    name: tf-a-parameterized-builder
+    node: master
+    project-type: freestyle
+    concurrent: true
+    disabled: false
+    defaults: global
+    properties:
+        - build-discarder:
+            days-to-keep: 180
+            num-to-keep: 3000
+        - authorization:
+            anonymous:
+              - job-read
+              - job-extended-read
+            lsandov1:
+              - job-read
+              - job-extended-read
+              - job-build
+              - job-cancel
+              - run-update
+    wrappers:
+        - timestamps
+    publishers:
+        - trigger-parameterized-builds:
+            - project: tf-a-builder
+              predefined-parameters: TEST_DESC=${TEST_DESC}
+              current-parameters: true
+              condition: SUCCESS
+

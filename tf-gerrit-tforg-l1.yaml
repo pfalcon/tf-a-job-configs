@@ -1,0 +1,112 @@
+- job:
+    name: tf-gerrit-tforg-l1
+    node: master
+    project-type: multijob
+    concurrent: true
+    disabled: false
+    description: |
+      Job that triggers for every TF-A patch approved with the Allow-CI+1
+      label on review.trustedfirmware.org.
+    properties:
+    - throttle:
+        option: project
+        enabled: true
+        max-total: 5
+    - build-discarder:
+        days-to-keep: 180
+        num-to-keep: 180
+    - authorization:
+        anonymous:
+          - job-read
+          - job-extended-read
+        lsandov1:
+          - job-read
+          - job-extended-read
+          - job-build
+          - job-cancel
+          - run-update
+    parameters:
+        - string:
+            name: GERRIT_PROJECT
+            default: 'TF-A/trusted-firmware-a'
+        - string:
+            name: GERRIT_BRANCH
+            default: 'master'
+        - string:
+            name: GERRIT_REFSPEC
+            default: 'refs/heads/master'
+    wrappers:
+      - credentials-binding:
+          - ssh-user-private-key:
+              credential-id: TFA_CI_BOT_USER_SSH_KEY
+              key-file-variable: CI_BOT_KEY
+              username-variable: CI_BOT_USERNAME
+              passphrase-variable: ''
+      - workspace-cleanup
+      - timestamps
+    builders:
+    - shell: |-
+        #!/bin/bash
+
+        set -e
+
+        cat << EOF > env.param
+        TF_GERRIT_PROJECT=${GERRIT_PROJECT}
+        TF_GERRIT_BRANCH=${GERRIT_BRANCH}
+        TF_GERRIT_REFSPEC=${GERRIT_REFSPEC}
+        EOF
+
+    - multijob:
+        condition: COMPLETED
+        name: Build and static checks
+        projects:
+        - kill-phase-on: NEVER
+          name: tf-ci-gateway
+          predefined-parameters: |-
+            TEST_GROUPS=tf-l2-scan-build
+            ENABLE_STATIC_CHECK=true
+          property-file: env.param
+
+    - multijob:
+        condition: COMPLETED
+        name: Run doc build check
+        projects:
+        - kill-phase-on: NEVER
+          name: tf-ci-gateway
+          predefined-parameters: |
+            TEST_GROUPS=tf-l1-check-docs
+          property-file: env.param
+
+    - multijob:
+        condition: COMPLETED
+        name: Run build tests
+        projects:
+        - kill-phase-on: NEVER
+          name: tf-ci-gateway
+          predefined-parameters: |
+            TEST_GROUPS=tf-l1-build-fvp tf-l1-build-juno tf-l1-build-clang tf-l1-build-plat
+          property-file: env.param
+
+    - multijob:
+        condition: COMPLETED
+        name: Run boot tests
+        projects:
+        - kill-phase-on: NEVER
+          name: tf-ci-gateway
+          predefined-parameters: |
+            TEST_GROUPS=tf-l1-boot-tests-aarch32 tf-l1-boot-tests-bl2_el3 tf-l1-boot-tests-cortex tf-l1-boot-tests-foundation tf-l1-boot-tests-gicv2 tf-l1-boot-tests-juno tf-l1-boot-tests-misc
+          property-file: env.param
+
+    triggers:
+    - gerrit:
+        server-name: review.trustedfirmware.org
+        projects:
+        - branches:
+          - branch-compare-type: PLAIN
+            branch-pattern: integration
+          project-compare-type: PLAIN
+          project-pattern: TF-A/trusted-firmware-a
+        trigger-on:
+          - comment-added-event:
+            approval-category: "Allow-CI"
+            approval-value: 1

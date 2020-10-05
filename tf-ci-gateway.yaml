@@ -1,0 +1,86 @@
+- scm:
+    name: tf-a-ci-scripts
+    scm:
+        - git:
+            url: https://git.trustedfirmware.org/ci/tf-a-ci-scripts.git
+            refspec: +refs/heads/master:refs/remotes/origin/master
+            name: origin
+            branches:
+                - refs/heads/master
+            basedir: tf-a-ci-scripts
+            skip-tag: true
+            shallow-clone: true
+            wipe-workspace: false
+
+- job:
+    name: tf-ci-gateway
+    node: master
+    project-type: freestyle
+    concurrent: true
+    disabled: false
+    defaults: global
+    description: |
+      Main job entry point for a Trusted Firmware A (TF-A) CI.
+    properties:
+    - build-discarder:
+        days-to-keep: 180
+        num-to-keep: 180
+    - throttle:
+        option: project
+        enabled: true
+        max-per-node: 3
+        max-total: 10
+    - authorization:
+        anonymous:
+          - job-read
+          - job-extended-read
+        lsandov1:
+          - job-read
+          - job-extended-read
+          - job-build
+          - job-cancel
+          - run-update
+    wrappers:
+    - credentials-binding:
+      - ssh-user-private-key:
+          credential-id: TFA_CI_BOT_USER_SSH_KEY
+          key-file-variable: CI_BOT_KEY
+          username-variable: CI_BOT_USERNAME
+          passphrase-variable: ''
+    - workspace-cleanup
+    - timeout:
+        timeout: 180
+        fail: true
+    - timestamps
+    parameters:
+    - string:
+        name: TEST_GROUPS
+        default: tf-l2-boot-tests-cortex/fvp-default:fvp-linux-dtb-fip.uboot-cortexa35x4-debug
+        description: |
+          White space separated list of test configs: can be mix of specific
+          test configs (e.g., <code>l1/fvp-default:fvp-linux-default</code>) and
+          group names (e.g., <code>l1 l2</code>).
+    - bool:
+        name: ENABLE_STATIC_CHECK
+        default: false
+    scm:
+        - tf-a-ci-scripts
+    builders:
+    - shell: |-
+        #!/bin/bash
+        set -e
+        CI_ROOT=${PWD}/tf-a-ci-scripts
+        export workspace=$PWD
+        export test_groups=$TEST_GROUPS
+        $CI_ROOT/script/gen_test_desc.py
+    - trigger-builds:
+      - project:
+        - tf-a-parameterized-builder
+        block: false
+        current-parameters: true
+        property-file-fail-on-missing: false
+        parameter-factories:
+        - factory: binaryfile
+          parameter-name: TEST_DESC
+          file-pattern: '*.test'
+          no-files-found-action: FAIL

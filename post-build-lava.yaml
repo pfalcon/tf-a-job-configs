@@ -1,7 +1,12 @@
 - job:
     name: post-build-lava
+    node: master
     project-type: freestyle
+    concurrent: true
+    disabled: false
     defaults: global
+    Description: |
+      Post build to LAVA
     properties:
         - build-discarder:
             days-to-keep: 365
@@ -10,6 +15,12 @@
             anonymous:
               - job-read
               - job-extended-read
+            lsandov1:
+              - job-read
+              - job-extended-read
+              - job-build
+              - job-cancel
+              - run-update
     parameters:
         - file:
             name: post_build_lava_parameters
@@ -19,9 +30,6 @@
         - string:
             name: LAVA_SERVER
             default: 'tf.validation.linaro.org/RPC2/'
-    disabled: false
-    node: master
-    display-name: 'Post build to LAVA'
     wrappers:
         - timestamps
         - credentials-binding:
