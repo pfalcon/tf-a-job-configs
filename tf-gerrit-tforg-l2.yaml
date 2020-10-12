@@ -1,0 +1,146 @@
+- job:
+    name: tf-gerrit-tforg-l2
+    node: master
+    project-type: multijob
+    concurrent: true
+    disabled: false
+    description: |
+      Job that triggers for every TF-A patch approved with the Allow-CI+2
+      label on review.trustedfirmware.org.
+    properties:
+    - throttle:
+        option: project
+        enabled: true
+        max-total: 5
+    - build-discarder:
+        days-to-keep: 180
+        num-to-keep: 180
+    - authorization:
+        anonymous:
+          - job-read
+          - job-extended-read
+        lsandov1:
+          - job-read
+          - job-extended-read
+          - job-build
+          - job-cancel
+          - run-update
+    parameters:
+        - string:
+            name: GERRIT_PROJECT
+            default: 'TF-A/trusted-firmware-a'
+        - string:
+            name: GERRIT_BRANCH
+            default: 'master'
+        - string:
+            name: GERRIT_REFSPEC
+            default: 'refs/heads/master'
+    wrappers:
+      - credentials-binding:
+          - ssh-user-private-key:
+              credential-id: TFA_CI_BOT_USER_SSH_KEY
+              key-file-variable: CI_BOT_KEY
+              username-variable: CI_BOT_USERNAME
+              passphrase-variable: ''
+      - workspace-cleanup
+      - timestamps
+    builders:
+    - shell: |-
+        #!/bin/bash
+
+        set -e
+
+        cat << EOF > env.param
+        GERRIT_PROJECT=${GERRIT_PROJECT}
+        GERRIT_BRANCH=${GERRIT_BRANCH}
+        GERRIT_REFSPEC=${GERRIT_REFSPEC}
+        EOF
+
+    - multijob:
+        condition: COMPLETED
+        name: Carry out level 1 tests
+        projects:
+        - kill-phase-on: NEVER
+          name: tf-tftf-gerrit-tforg-l1
+          current-parameters: true
+          property-file: env.param
+
+    - multijob:
+        condition: COMPLETED
+        name: Build Trusted Firmware
+        projects:
+        - kill-phase-on: NEVER
+          name: tf-ci-gateway
+          predefined-parameters: |
+            TEST_GROUPS=tf-l2-build-fvp tf-l2-build-juno
+            TF_REFSPEC=$GERRIT_REFSPEC
+          property-file: env.param
+
+    - multijob:
+        condition: COMPLETED
+        name: TFTF tests
+        projects:
+        - kill-phase-on: NEVER
+          name: tf-ci-gateway
+          predefined-parameters: |
+            TEST_GROUPS=tftf-l1-fvp tftf-l1-spm tftf-l1-juno tftf-l2-fvp-auxiliary tftf-l2-fvp-dynamiq tftf-l2-fwu
+            TF_REFSPEC=$GERRIT_REFSPEC
+          property-file: env.param
+
+    - multijob:
+        condition: COMPLETED
+        name: Boot up to the Linux shell prompt
+        projects:
+        - kill-phase-on: NEVER
+          name: tf-ci-gateway
+          predefined-parameters: |
+            TEST_GROUPS=tf-l2-boot-tests-aarch32 tf-l2-boot-tests-bl2_el3 tf-l2-boot-tests-cortex tf-l2-boot-tests-foundation tf-l2-boot-tests-juno tf-l2-boot-tests-latest tf-l2-boot-tests-misc tf-l2-boot-tests-rootfs tf-l2-boot-tests-spm
+            TF_REFSPEC=$GERRIT_REFSPEC
+          property-file: env.param
+
+    - multijob:
+        condition: COMPLETED
+        name: Coverity Scan
+        projects:
+        - kill-phase-on: NEVER
+          name: tf-ci-gateway
+          predefined-parameters: |
+            TEST_GROUPS=tf-l2-coverity-misra
+            TF_REFSPEC=$GERRIT_REFSPEC
+          property-file: env.param
+
+    - conditional-step:
+        condition-command: |-
+          [ "$NOMINATION_FILE" ]
+        condition-kind: shell
+        on-evaluation-failure: dont-run
+        steps:
+        - multijob:
+            condition: COMPLETED
+            name: Nominated tests
+            projects:
+            - kill-phase-on: NEVER
+              name: tf-ci-gateway
+              predefined-parameters: |
+                TEST_GROUPS=@$NOMINATION_FILE
+                TF_REFSPEC=$GERRIT_REFSPEC
+              property-file: env.param
+
+    triggers:
+    - gerrit:
+        server-name: review.trustedfirmware.org
+        projects:
+        - branches:
+          - branch-compare-type: PLAIN
+            branch-pattern: integration
+          project-compare-type: PLAIN
+          project-pattern: TF-A/trusted-firmware-a
+        trigger-on:
+          - comment-added-event:
+              approval-category: "Allow-CI"
+              approval-value: 2
+          override-votes: true
+          gerrit-build-successful-verified-value: 1
+          gerrit-build-failed-verified-value: -1
+          gerrit-build-unstable-verified-value: -1
+            approval-value: 1
