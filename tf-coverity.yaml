@@ -1,0 +1,130 @@
+- scm:
+    name: tf-a-ci-scripts
+    scm:
+        - git:
+            url: https://git.trustedfirmware.org/ci/tf-a-ci-scripts.git
+            refspec: +refs/heads/master:refs/remotes/origin/master
+            name: origin
+            branches:
+                - refs/heads/master
+            basedir: tf-a-ci-scripts
+            skip-tag: true
+            shallow-clone: true
+            wipe-workspace: false
+- scm:
+    name: trusted-firmware-a
+    scm:
+        - git:
+            url: https://review.trustedfirmware.org/${TF_GERRIT_PROJECT}
+            refspec: ${TF_GERRIT_REFSPEC}
+            name: origin
+            branches:
+                - ${TF_GERRIT_BRANCH}
+            basedir: trusted-firmware-a
+            skip-tag: true
+            shallow-clone: false
+            wipe-workspace: false
+- job:
+    name: tf-coverity
+    node: docker-amd64-tf-a-bionic
+    project-type: freestyle
+    concurrent: true
+    disabled: false
+    defaults: global
+    description: |
+      Run the Coverity tool on Trusted Firmware and submit the resulting
+      tarball to <a href="https://scan.coverity.com/projects/arm-software-arm-trusted-firmware">Coverity Scan Online</a>.
+      <br/>
+      This job runs <b>every weekday</b> and by default uses the <b>integration</b> branch on trustedfirmware.org.
+    properties:
+        - build-discarder:
+            days-to-keep: 180
+            num-to-keep: 180
+        - authorization:
+            anonymous:
+              - job-discover
+              - job-read
+              - job-extended-read
+              - job-workspace
+            lsandov1:
+              - job-read
+              - job-extended-read
+              - job-build
+              - job-cancel
+              - run-update
+    parameters:
+        - string:
+            name: TF_GERRIT_PROJECT
+            default: 'TF-A/trusted-firmware-a'
+        - string:
+            name: TF_GERRIT_BRANCH
+            default: 'refs/heads/integration'
+        - string:
+            name: TF_GERRIT_REFSPEC
+            default: '+refs/heads/integration:refs/remotes/origin/integration'
+        - bool:
+            name: UPLOAD_TO_COVERITY_SCAN_ONLINE
+            default: false
+    scm:
+        - tf-a-ci-scripts
+        - trusted-firmware-a
+    wrappers:
+        - timestamps
+        - credentials-binding:
+          - text:
+              credential-id: TF-COVERITY-SCAN-TOKEN
+              variable: TF_COVERITY_SCAN_TOKEN
+    builders:
+        - shell: |-
+            #!/bin/bash
+            set -xe
+
+            export PS4='${BASH_SOURCE}:${LINENO}: ${FUNCNAME[0]}() - [${SHLVL},${BASH_SUBSHELL},$?] '
+
+            FIXME: node bionic-amd64-tf-a-build does not set correctly PATH=$TOOLS_DIR/bin:$PATH
+            TOOLS_DIR=/home/buildslave/tools
+            export PATH=${TOOLS_DIR}/bin:${PATH}
+
+            Install crypto library
+            CRYPTOCELL_LIB_PATH=/arm/projectscratch/ssg/trusted-fw
+            mkdir -p ${CRYPTOCELL_LIB_PATH}
+            cd ${CRYPTOCELL_LIB_PATH}
+            curl --connect-timeout 5 --retry 5 --retry-delay 1 \
+                 -sLSO -C - https://downloads.trustedfirmware.org/tf-a/dummy-crypto-lib.tar
+            tar xf dummy-crypto-lib.tar
+
+            Fetch coverity tool and untar it
+            COVERITY_VERSION=2019.03
+            cd ${WORKSPACE}
+            wget https://scan.coverity.com/download/linux64 \
+                --quiet \
+                --post-data "token=${TF_COVERITY_SCAN_TOKEN}&project=ARM-software%2Farm-trusted-firmware" \
+                -O coverity_tool.tgz
+            tar -xzf coverity_tool.tgz
+            mv cov-analysis-linux64-${COVERITY_VERSION} coverity
+            export PATH=${WORKSPACE}/coverity/bin:${PATH}
+
+            Run coverity
+            cd ${WORKSPACE}/trusted-firmware-a
+            ${WORKSPACE}/tf-a-ci-scripts/script/tf-coverity/run_coverity_on_tf.py --tf $(pwd)
+
+        - conditional-step:
+            condition-kind: boolean-expression
+            condition-expression: "${UPLOAD_TO_COVERITY_SCAN_ONLINE}"
+            on-evaluation-failure: dont-run
+            steps:
+            - shell: |-
+                #!/bin/bash
+
+                echo "Uploading tarball to Coverity Scan Online..."
+                GIT_COMMIT=$(git rev-parse HEAD)
+
+                curl \
+                  --form token=${{TF_COVERITY_SCAN_TOKEN}} \
+                  --form email=sandrine.bailleux@arm.com \
+                  --form file=@"arm-tf-coverity-results.tgz" \
+                  --form version="Commit ${{GIT_COMMIT}}" \
+                  --form description="Build ${{BUILD_DISPLAY_NAME}}" \
+                  https://scan.coverity.com/builds?project=ARM-software%2Farm-trusted-firmware
+    triggers:
+    - timed: H H(4-6) * * 1-5
