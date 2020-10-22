@@ -74,7 +74,7 @@ install-linaro-toolchains
 install-arm-toolchains
 
 # Additional binaries required (rootfs, etc...)
-LINARO_VERSION=19.06
+LINARO_VERSION=20.01
 mkdir -p \
   ${WORKSPACE}/nfs/downloads/linaro/${LINARO_VERSION} \
   ${WORKSPACE}/nfs/downloads/mbedtls
