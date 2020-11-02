@@ -1,0 +1,83 @@
+- defaults:
+    name: global
+    gerrit-project: 'TF-A/trusted-firmware-a'
+    gerrit-branch: 'master'
+    gerrit-refspec: 'refs/heads/master'
+    days-to-keep: '180'
+    num-to-keep: '180'
+    exec-node: 'docker-amd64-bionic'
+
+- scm:
+    name: tf-a-ci-scripts
+    scm:
+        - git:
+            url: https://git.trustedfirmware.org/ci/tf-a-ci-scripts.git
+            refspec: +refs/heads/master:refs/remotes/origin/master
+            name: origin
+            branches:
+                - refs/heads/master
+            basedir: tf-a-ci-scripts
+            skip-tag: true
+            shallow-clone: true
+            wipe-workspace: false
+- scm:
+    name: trusted-firmware-a
+    scm:
+        - git:
+            url: https://review.trustedfirmware.org/${GERRIT_PROJECT}
+            refspec: ${GERRIT_REFSPEC}
+            name: origin
+            branches:
+                - ${GERRIT_BRANCH}
+            basedir: trusted-firmware-a
+            skip-tag: true
+            shallow-clone: true
+            wipe-workspace: false
+
+
+- job-template:
+    name: '{name}-{static}'
+    project-type: freestyle
+    defaults: global
+    properties:
+        - build-discarder:
+            days-to-keep: '{days-to-keep}'
+            num-to-keep: '{num-to-keep}'
+    parameters:
+        - string:
+            name: GERRIT_PROJECT
+            default: '{gerrit-project}'
+        - string:
+            name: GERRIT_BRANCH
+            default: '{gerrit-branch}'
+        - string:
+            name: GERRIT_REFSPEC
+            default: '{gerrit-refspec}'
+    disabled: false
+    node: '{exec-node}'
+    display-name: 'Trusted Firmware A (TF-A) {static}'
+    scm:
+        - tf-a-ci-scripts
+        - trusted-firmware-a
+    wrappers:
+        - timestamps
+
+    builders:
+        - shell:  |
+            #!/bin/bash
+            set -e
+            cd "${{WORKSPACE}}/trusted-firmware-a"
+            "${{WORKSPACE}}/tf-a-ci-scripts/{check-script}"
+            cd -
+    publishers:
+        - archive:
+            artifacts: 'artefacts/**'
+            latest-only: false
+
+- project:
+    name: tf-a-static
+    static:
+        - arm-checks:
+            check-script: "script/static-checks/static-checks.sh"
+    jobs:
+    - '{name}-{static}'
