@@ -1,0 +1,289 @@
+- scm:
+    name: tf-a-ci-scripts
+    scm:
+        - git:
+            url: https://git.trustedfirmware.org/ci/tf-a-ci-scripts.git
+            refspec: +refs/heads/master:refs/remotes/origin/master
+            name: origin
+            branches:
+                - refs/heads/master
+            basedir: tf-a-ci-scripts
+            skip-tag: true
+            shallow-clone: true
+            wipe-workspace: false
+- scm:
+    name: trusted-firmware-a
+    scm:
+        - git:
+            url: https://review.trustedfirmware.org/${TF_GERRIT_PROJECT}
+            refspec: ${TF_GERRIT_REFSPEC}
+            name: origin
+            branches:
+                - ${TF_GERRIT_BRANCH}
+            basedir: trusted-firmware-a
+            skip-tag: true
+            shallow-clone: false
+            wipe-workspace: false
+- job:
+    name: tf-main
+    node: master
+    project-type: multijob
+    concurrent: true
+    disabled: false
+    description: Main CI job for Trusted Firmware.
+    properties:
+    - throttle:
+        option: project
+        enabled: true
+        max-total: 5
+    - build-discarder:
+        days-to-keep: 180
+        num-to-keep: 180
+    - authorization:
+        anonymous:
+          - job-read
+          - job-extended-read
+        lsandov1:
+          - job-read
+          - job-extended-read
+          - job-build
+          - job-cancel
+          - run-update
+    parameters:
+        - string:
+            name: TF_GERRIT_PROJECT
+            default: 'TF-A/trusted-firmware-a'
+        - string:
+            name: TF_GERRIT_BRANCH
+            default: 'master'
+        - string:
+            name: TF_GERRIT_REFSPEC
+            default: 'refs/heads/master'
+        - string:
+            name: TFTF_GERRIT_PROJECT
+            default: 'TF-A/tf-a-tests'
+        - string:
+            name: TFTF_GERRIT_BRANCH
+            default: 'master'
+        - string:
+            name: TFTF_GERRIT_REFSPEC
+            default: 'refs/heads/master'
+    scm:
+        - tf-a-ci-scripts
+        - trusted-firmware-a
+    wrappers:
+      - credentials-binding:
+          - ssh-user-private-key:
+              credential-id: TFA_CI_BOT_USER_SSH_KEY
+              key-file-variable: CI_BOT_KEY
+              username-variable: CI_BOT_USERNAME
+              passphrase-variable: ''
+      - workspace-cleanup
+      - timestamps
+    builders:
+    - shell: |-
+        #!/bin/bash
+
+        set -e
+
+        cat << EOF > tf-a-env.param
+        GERRIT_PROJECT=${TF_GERRIT_PROJECT}
+        GERRIT_BRANCH=${TF_GERRIT_BRANCH}
+        GERRIT_REFSPEC=${TF_GERRIT_REFSPEC}
+        EOF
+
+        cat << EOF > tf-a-tests-env.param
+        GERRIT_PROJECT=${TFTF_GERRIT_PROJECT}
+        GERRIT_BRANCH=${TFTF_GERRIT_BRANCH}
+        GERRIT_REFSPEC=${TFTF_GERRIT_REFSPEC}
+        EOF
+
+    - multijob:
+        name: Run static checks on the code
+        condition: COMPLETED
+        projects:
+        - name: tf-ci-gateway
+          current-parameters: true
+          kill-phase-on: NEVER
+          predefined-parameters: |-
+            REPO_UNDER_TEST=trusted-firmware
+          property-file: tf-a-env.param
+
+    - multijob:
+        name: Build Trusted Firmware
+        condition: COMPLETED
+        projects:
+        - name: tf-ci-gateway
+          current-parameters: true
+          kill-phase-on: NEVER
+          predefined-parameters: |
+            TEST_GROUPS=tf-l1-build-fvp tf-l2-build-fvp
+          property-file: tf-a-env.param
+        - name: tf-ci-gateway
+          current-parameters: true
+          kill-phase-on: NEVER
+          predefined-parameters: TEST_GROUPS=tf-l1-build-juno tf-l2-build-juno
+          property-file: tf-a-env.param
+        - name: tf-ci-gateway
+          current-parameters: true
+          kill-phase-on: NEVER
+          predefined-parameters: TEST_GROUPS=tf-l1-build-plat
+          property-file: tf-a-env.param
+        - name: tf-ci-gateway
+          current-parameters: true
+          kill-phase-on: NEVER
+          predefined-parameters: TEST_GROUPS=tf-l1-build-clang
+          property-file: tf-a-env.param
+
+    - multijob:
+        name: TFTF Tests
+        condition: COMPLETED
+        projects:
+        - name: tf-ci-gateway
+          current-parameters: true
+          kill-phase-on: NEVER
+          predefined-parameters: TEST_GROUPS=tftf-l2-fwu
+          property-file: tf-a-tests-env.param
+        - name: tf-ci-gateway
+          current-parameters: true
+          kill-phase-on: NEVER
+          predefined-parameters: TEST_GROUPS=tftf-l1-fvp tftf-l1-spm tftf-l1-juno tftf-l2-fvp-auxiliary
+          property-file: tf-a-tests-env.param
+        - name: tf-ci-gateway
+          current-parameters: true
+          kill-phase-on: NEVER
+          predefined-parameters: TEST_GROUPS=tftf-l2-fvp tftf-l2-fvp-dynamiq
+          property-file: tf-a-tests-env.param
+        - name: tf-ci-gateway
+          current-parameters: true
+          kill-phase-on: NEVER
+          predefined-parameters: TEST_GROUPS=tftf-l2-extensive-tests-fvp
+          property-file: tf-a-tests-env.param
+
+    - multijob:
+        name: Boot up to the Linux shell prompt
+        condition: COMPLETED
+        projects:
+        - name: tf-ci-gateway
+          current-parameters: true
+          kill-phase-on: NEVER
+          predefined-parameters: TEST_GROUPS=tf-l2-boot-tests-foundation
+          property-file: tf-a-env.param
+        - name: tf-ci-gateway
+          current-parameters: true
+          kill-phase-on: NEVER
+          predefined-parameters: TEST_GROUPS=tf-l2-boot-tests-aarch32
+          property-file: tf-a-env.param
+        - name: tf-ci-gateway
+          current-parameters: true
+          kill-phase-on: NEVER
+          predefined-parameters: TEST_GROUPS=tf-l2-boot-tests-rootfs
+          property-file: tf-a-env.param
+        - name: tf-ci-gateway
+          current-parameters: true
+          kill-phase-on: NEVER
+          predefined-parameters: TEST_GROUPS=tf-l2-boot-tests-juno
+          property-file: tf-a-env.param
+        - name: tf-ci-gateway
+          current-parameters: true
+          kill-phase-on: NEVER
+          predefined-parameters: TEST_GROUPS=tf-l2-boot-tests-spm
+          property-file: tf-a-env.param
+
+    - multijob:
+        name: Boot up to the Linux shell prompt - Part 2
+        condition: COMPLETED
+        projects:
+        - name: tf-ci-gateway
+          current-parameters: true
+          kill-phase-on: NEVER
+          predefined-parameters: TEST_GROUPS=tf-l2-boot-tests-misc
+          property-file: tf-a-env.param
+        - name: tf-ci-gateway
+          current-parameters: true
+          kill-phase-on: NEVER
+          predefined-parameters: TEST_GROUPS=tf-l2-boot-tests-latest
+          property-file: tf-a-env.param
+        - name: tf-ci-gateway
+          current-parameters: true
+          kill-phase-on: NEVER
+          predefined-parameters: TEST_GROUPS=tf-l2-boot-tests-cortex
+          property-file: tf-a-env.param
+        - name: tf-ci-gateway
+          current-parameters: true
+          kill-phase-on: NEVER
+          predefined-parameters: TEST_GROUPS=tf-l2-boot-tests-gicv2
+          property-file: tf-a-env.param
+        - name: tf-ci-gateway
+          current-parameters: true
+          kill-phase-on: NEVER
+          predefined-parameters: TEST_GROUPS=tf-l2-boot-tests-bl2_el3
+          property-file: tf-a-env.param
+
+    - multijob:
+        name: Miscellaneous tests
+        condition: COMPLETED
+        projects:
+        - name: tf-ci-gateway
+          current-parameters: true
+          kill-phase-on: NEVER
+          predefined-parameters: TEST_GROUPS=tf-l3-boot-tests-css
+          property-file: tf-a-env.param
+        - name: tf-ci-gateway
+          current-parameters: true
+          kill-phase-on: NEVER
+          predefined-parameters: TEST_GROUPS=tf-l3-boot-tests-spm
+          property-file: tf-a-env.param
+        - name: tf-ci-gateway
+          current-parameters: true
+          kill-phase-on: NEVER
+          predefined-parameters: TEST_GROUPS=tf-l3-boot-tests-ras
+          property-file: tf-a-env.param
+        - name: tf-ci-gateway
+          current-parameters: true
+          kill-phase-on: NEVER
+          predefined-parameters: TEST_GROUPS=tf-l3-boot-tests-misc
+          property-file: tf-a-env.param
+
+    - multijob:
+        name: Code coverage
+        condition: COMPLETED
+        projects:
+        - name: tf-ci-gateway
+          current-parameters: true
+          kill-phase-on: NEVER
+          predefined-parameters: TEST_GROUPS=tf-l3-code-coverage
+          property-file: tf-a-env.param
+
+    - multijob:
+        name: Run doc build check
+        condition: COMPLETED
+        projects:
+        - name: tf-ci-gateway
+          current-parameters: true
+          kill-phase-on: NEVER
+          predefined-parameters: TEST_GROUPS=tf-l1-check-docs
+          property-file: tf-a-env.param
+
+    # Run the unstable TF-A Tests at the end but do not let their results
+    # participate in the job's success/failure.
+    - trigger-builds:
+        - project: tf-ci-gateway
+          same-node: True
+          current-parameters: True
+          property-file: tf-a-tests-env.param
+          property-file-fail-on-missing: True
+          predefined-parameters: TEST_GROUPS=tftf-unstable
+          block: True
+          block-thresholds:
+            build-step-failure-threshold: never
+            unstable-threshold: never
+            failure-threshold: never
+
+    # If all tests passed, catch up the master branch with integration
+    - conditional-step:
+        condition-kind: current-status
+        condition-best: SUCCESS
+        condition-worst: SUCCESS
+        steps:
+        - shell: bash "${WORKSPACE}/tf-a-ci-scripts/script/scratch_scripts/fast-forward-master.sh
