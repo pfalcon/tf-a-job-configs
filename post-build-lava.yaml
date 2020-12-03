@@ -3,7 +3,7 @@
     node: master
     project-type: freestyle
     concurrent: true
-    disabled: false
+    disabled: true
     defaults: global
     Description: |
       Post build to LAVA

@@ -35,6 +35,12 @@
         - string:
             name: GERRIT_REFSPEC
             default: 'refs/heads/master'
+        - string:
+            name: GERRIT_PATCHSET_NUMBER
+            default: ''
+        - string:
+            name: GERRIT_CHANGE_NUMBER
+            default: ''
     wrappers:
       - credentials-binding:
           - ssh-user-private-key:
@@ -51,6 +57,10 @@
         set -e
 
         cat << EOF > env.param
+        GERRIT_PATCHSET_NUMBER=${GERRIT_PATCHSET_NUMBER}
+        GERRIT_CHANGE_NUMBER=${GERRIT_CHANGE_NUMBER}
+        QA_SERVER_PROJECT=${JOB_NAME}
+        QA_SERVER_VERSION=${BUILD_NUMBER}
         GERRIT_PROJECT=${GERRIT_PROJECT}
         GERRIT_BRANCH=${GERRIT_BRANCH}
         GERRIT_REFSPEC=${GERRIT_REFSPEC}

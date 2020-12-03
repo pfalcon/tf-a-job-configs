@@ -97,6 +97,21 @@
         - string:
             name: MBEDTLS_URL
             default: 'https://github.com/ARMmbed/mbedtls/archive/mbedtls-2.24.0.tar.gz'
+        - string:
+            name: GERRIT_PATCHSET_NUMBER
+            default: ''
+        - string:
+            name: GERRIT_CHANGE_NUMBER
+            default: ''
+        - string:
+            name: QA_SERVER_TEAM
+            default: 'tf'
+        - string:
+            name: QA_SERVER_PROJECT
+            default: 'tf-a'
+        - string:
+            name: QA_SERVER
+            default: 'https://qa-reports.linaro.org'
         - bool:
             name: ENABLE_STATIC_CHECK
             default: false
@@ -112,6 +127,10 @@
         - tf-a-tests
     wrappers:
         - timestamps
+        - credentials-binding:
+            - text:
+                credential-id: QA_REPORTS_TOKEN
+                variable: QA_REPORTS_TOKEN
     builders:
         - conditional-step:
             condition-kind: boolean-expression
@@ -143,8 +162,7 @@
 
                 cat << EOF > ${WORKSPACE}/post-build-lava.param
                 DEVICE_TYPE=${DEVICE_TYPE}
-                CUSTOM_YAML_URL=${CUSTOM_YAML_URL}
-                LAVA_SERVER=tf.validation.linaro.org/RPC2/
+                LAVA_SERVER=tf.validation.linaro.org
                 EOF
     publishers:
         - archive:
@@ -157,6 +175,18 @@
             condition-filename: artefacts/debug/job.yaml
             condition-basedir: workspace
             action:
-              - trigger-parameterized-builds:
-                  - project: post-build-lava
-                    property-file: post-build-lava.param
+                - postbuildscript:
+                    builders:
+                        - role: SLAVE
+                          build-on:
+                              - SUCCESS
+                          build-steps:
+                            - inject:
+                                properties-file: ${WORKSPACE}/post-build-lava.param
+                            - shell:
+                                !include-raw: tf-a-builder/test.sh
+        - groovy-postbuild:
+            script:
+                !include-raw:
+                  - tf-a-builder/test.groovy
+
