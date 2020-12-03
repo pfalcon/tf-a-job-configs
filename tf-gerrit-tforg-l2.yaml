@@ -129,18 +129,18 @@
     triggers:
     - gerrit:
         server-name: review.trustedfirmware.org
-        projects:
-        - branches:
-          - branch-compare-type: PLAIN
-            branch-pattern: integration
-          project-compare-type: PLAIN
-          project-pattern: TF-A/trusted-firmware-a
         trigger-on:
           - comment-added-event:
               approval-category: "Allow-CI"
               approval-value: 2
-          override-votes: true
-          gerrit-build-successful-verified-value: 1
-          gerrit-build-failed-verified-value: -1
-          gerrit-build-unstable-verified-value: -1
-            approval-value: 1
+        projects:
+          - project-compare-type: PLAIN
+            project-pattern: TF-A/trusted-firmware-a
+            branches:
+              - branch-compare-type: PLAIN
+                branch-pattern: integration
+        override-votes: true
+        gerrit-build-successful-verified-value: 1
+        gerrit-build-failed-verified-value: -1
+        gerrit-build-unstable-verified-value: -1
+        approval-value: 1
