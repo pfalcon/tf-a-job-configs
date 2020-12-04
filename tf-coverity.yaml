@@ -77,15 +77,9 @@
     builders:
         - shell: |-
             #!/bin/bash
-            set -xe
+            set -e
 
-            export PS4='${BASH_SOURCE}:${LINENO}: ${FUNCNAME[0]}() - [${SHLVL},${BASH_SUBSHELL},$?] '
-
-            FIXME: node bionic-amd64-tf-a-build does not set correctly PATH=$TOOLS_DIR/bin:$PATH
-            TOOLS_DIR=/home/buildslave/tools
-            export PATH=${TOOLS_DIR}/bin:${PATH}
-
-            Install crypto library
+            # Install crypto library
             CRYPTOCELL_LIB_PATH=/arm/projectscratch/ssg/trusted-fw
             mkdir -p ${CRYPTOCELL_LIB_PATH}
             cd ${CRYPTOCELL_LIB_PATH}
@@ -93,7 +87,7 @@
                  -sLSO -C - https://downloads.trustedfirmware.org/tf-a/dummy-crypto-lib.tar
             tar xf dummy-crypto-lib.tar
 
-            Fetch coverity tool and untar it
+            # Fetch coverity tool and untar it
             COVERITY_VERSION=2019.03
             cd ${WORKSPACE}
             wget https://scan.coverity.com/download/linux64 \
@@ -104,7 +98,7 @@
             mv cov-analysis-linux64-${COVERITY_VERSION} coverity
             export PATH=${WORKSPACE}/coverity/bin:${PATH}
 
-            Run coverity
+            # Run coverity
             cd ${WORKSPACE}/trusted-firmware-a
             ${WORKSPACE}/tf-a-ci-scripts/script/tf-coverity/run_coverity_on_tf.py --tf $(pwd)
 
