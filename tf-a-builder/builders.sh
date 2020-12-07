@@ -36,10 +36,6 @@ export mbedtls_archive=${WORKSPACE}/nfs/downloads/mbedtls/$(ls -1 mbedtls-*.tar.
 # Path to root of CI repository
 ci_root="${WORKSPACE}/tf-a-ci-scripts"
 
-# FIXME: node bionic-amd64-tf-a-build does not set correctly PATH=$TOOLS_DIR/bin:$PATH
-TOOLS_DIR=/home/buildslave/tools
-export PATH=${TOOLS_DIR}/bin:${PATH}
-
 export tfa_downloads="https://downloads.trustedfirmware.org/tf-a"
 
 # Fetch required firmware/binaries and place it at proper location
