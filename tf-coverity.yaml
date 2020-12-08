@@ -75,8 +75,9 @@
               credential-id: TF-COVERITY-SCAN-TOKEN
               variable: TF_COVERITY_SCAN_TOKEN
     builders:
-        - shell: |-
+        - shell: |
             #!/bin/bash
+
             set -e
 
             # Install crypto library
@@ -107,7 +108,7 @@
             condition-expression: "${UPLOAD_TO_COVERITY_SCAN_ONLINE}"
             on-evaluation-failure: dont-run
             steps:
-            - shell: |-
+            - shell: |
                 #!/bin/bash
 
                 echo "Uploading tarball to Coverity Scan Online..."

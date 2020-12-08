@@ -45,7 +45,7 @@
       - workspace-cleanup
       - timestamps
     builders:
-    - shell: |-
+    - shell: |
         #!/bin/bash
 
         set -e

@@ -117,7 +117,7 @@
             condition-kind: boolean-expression
             condition-expression: "${ENABLE_STATIC_CHECK}"
             steps:
-              - shell: |-
+              - shell: |
                   #!/bin/bash
                   set -e
                   export IS_CONTINUOUS_INTEGRATION=1
