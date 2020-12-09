@@ -27,4 +27,3 @@
               predefined-parameters: TEST_DESC=${TEST_DESC}
               current-parameters: true
               condition: SUCCESS
-
