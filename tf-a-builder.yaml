@@ -104,6 +104,9 @@
             name: GERRIT_CHANGE_NUMBER
             default: ''
         - string:
+            name: GERRIT_HOST
+            default: 'review.trustedfirmware.org'
+        - string:
             name: QA_SERVER_TEAM
             default: 'tf'
         - string:
