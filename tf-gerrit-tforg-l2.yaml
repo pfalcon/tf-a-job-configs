@@ -151,6 +151,24 @@
               - branch-compare-type: PLAIN
                 branch-pattern: integration
         override-votes: true
+        gerrit-build-started-verified-value: 0
         gerrit-build-successful-verified-value: 1
         gerrit-build-failed-verified-value: -1
         gerrit-build-unstable-verified-value: -1
+        gerrit-build-notbuilt-verified-value: 0
+        gerrit-build-started-codereview-value: 0
+        gerrit-build-successful-codereview-value: 0
+        gerrit-build-failed-codereview-value: 0
+        gerrit-build-unstable-codereview-value: -1
+        gerrit-build-notbuilt-codereview-value: 0
+        failure-message: 'OpenCI: build failed'
+        successful-message: 'OpenCI: build successful'
+        unstable-message: 'OpenCI: build unstable'
+        notbuilt-message: 'OpenCI: no builds executed'
+        skip-vote:
+          successful: true
+          failed: true
+          unstable: true
+          notbuilt: true
+        silent: false
+        silent-start: false
