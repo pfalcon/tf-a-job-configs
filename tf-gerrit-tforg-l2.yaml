@@ -154,4 +154,3 @@
         gerrit-build-successful-verified-value: 1
         gerrit-build-failed-verified-value: -1
         gerrit-build-unstable-verified-value: -1
-        approval-value: 1
