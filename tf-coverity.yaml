@@ -38,8 +38,7 @@
       This job runs <b>every weekday</b> and by default uses the <b>integration</b> branch on trustedfirmware.org.
     properties:
         - build-discarder:
-            days-to-keep: 180
-            num-to-keep: 180
+            days-to-keep: 7
         - authorization:
             anonymous:
               - job-discover
@@ -122,4 +121,7 @@
                   --form description="Build ${{BUILD_DISPLAY_NAME}}" \
                   https://scan.coverity.com/builds?project=ARM-software%2Farm-trusted-firmware
     triggers:
-    - timed: H H(4-6) * * 1-5
+        - timed: H H(4-6) * * 1-5
+    publishers:
+        - archive:
+            artifacts: 'trusted-firmware-a/arm-tf-coverity-results.tgz, trusted-firmware-a/tf_coverage.log'
