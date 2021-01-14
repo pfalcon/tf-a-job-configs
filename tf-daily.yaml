@@ -1,0 +1,48 @@
+- job:
+    name: tf-daily
+    node: master
+    project-type: freestyle
+    concurrent: false
+    disabled: false
+    description: Triggers tf-main and tf-coverity for the TF-A project.
+    properties:
+    - build-discarder:
+        days-to-keep: 7
+        num-to-keep: 30
+    - authorization:
+        anonymous:
+          - job-read
+          - job-extended-read
+        lsandov1:
+          - job-read
+          - job-extended-read
+          - job-build
+          - job-cancel
+          - run-update
+    parameters:
+        - string:
+            name: TF_GERRIT_PROJECT
+            default: 'TF-A/trusted-firmware-a'
+        - string:
+            name: TF_GERRIT_BRANCH
+            default: 'master'
+        - string:
+            name: TF_GERRIT_REFSPEC
+            default: 'refs/heads/master'
+        - string:
+            name: GERRIT_PATCHSET_NUMBER
+            default: ''
+        - string:
+            name: GERRIT_CHANGE_NUMBER
+            default: ''
+    wrappers:
+        - timestamps
+    builders:
+        - trigger-builds:
+            - project:
+                - tf-main
+                - tf-coverity
+              block: true
+              current-parameters: true
+    triggers:
+          timed: H H(0-6) * * 1-5

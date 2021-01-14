@@ -120,8 +120,6 @@
                   --form version="Commit ${{GIT_COMMIT}}" \
                   --form description="Build ${{BUILD_DISPLAY_NAME}}" \
                   https://scan.coverity.com/builds?project=ARM-software%2Farm-trusted-firmware
-    triggers:
-        - timed: H H(4-6) * * 1-5
     publishers:
         - archive:
             artifacts: 'trusted-firmware-a/arm-tf-coverity-results.tgz, trusted-firmware-a/tf_coverage.log'
