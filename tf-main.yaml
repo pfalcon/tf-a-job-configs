@@ -106,11 +106,9 @@
         name: Run static checks on the code
         condition: COMPLETED
         projects:
-        - name: tf-ci-gateway
+        - name: tf-static-checks
           current-parameters: true
           kill-phase-on: NEVER
-          predefined-parameters: |-
-            REPO_UNDER_TEST=trusted-firmware
           property-file: tf-a-env.param
 
     - multijob:

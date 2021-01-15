@@ -118,12 +118,6 @@
         - bool:
             name: ENABLE_STATIC_CHECK
             default: false
-        - choice:
-            name: REPO_UNDER_STATIC_CHECK
-            choices:
-              - trusted-firmware-a
-              - tf-a-tests
-            default: trusted-firmware-a
     scm:
         - tf-a-ci-scripts
         - trusted-firmware-a
@@ -135,17 +129,6 @@
                 credential-id: QA_REPORTS_TOKEN
                 variable: QA_REPORTS_TOKEN
     builders:
-        - conditional-step:
-            condition-kind: boolean-expression
-            condition-expression: "${ENABLE_STATIC_CHECK}"
-            steps:
-              - shell: |
-                  #!/bin/bash
-                  set -e
-                  export IS_CONTINUOUS_INTEGRATION=1
-                  cd ${WORKSPACE}/${REPO_UNDER_STATIC_CHECK}
-                  ${WORKSPACE}/tf-a-ci-scripts/script/static-checks/static-checks.sh
-                  mv "static-checks.log" "$WORKSPACE"
         - shell:
             !include-raw: tf-a-builder/builders.sh
         - conditional-step:

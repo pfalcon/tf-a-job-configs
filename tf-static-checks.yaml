@@ -1,0 +1,101 @@
+- scm:
+    name: tf-a-ci-scripts
+    scm:
+        - git:
+            url: https://git.trustedfirmware.org/ci/tf-a-ci-scripts.git
+            refspec: +refs/heads/master:refs/remotes/origin/master
+            name: origin
+            branches:
+                - refs/heads/master
+            basedir: tf-a-ci-scripts
+            skip-tag: true
+            shallow-clone: true
+            wipe-workspace: false
+- scm:
+    name: trusted-firmware-a
+    scm:
+        - git:
+            url: https://review.trustedfirmware.org/${TF_GERRIT_PROJECT}
+            refspec: ${TF_GERRIT_REFSPEC}
+            name: origin
+            branches:
+                - ${TF_GERRIT_BRANCH}
+            basedir: trusted-firmware-a
+            skip-tag: true
+            shallow-clone: false
+            wipe-workspace: false
+
+- job:
+    name: tf-static-checks
+    node: docker-amd64-tf-a-bionic
+    project-type: freestyle
+    concurrent: true
+    disabled: false
+    defaults: global
+    description: Run static checks on Git repository
+    properties:
+        - build-discarder:
+            days-to-keep: 7
+        - authorization:
+            anonymous:
+              - job-discover
+              - job-read
+              - job-extended-read
+              - job-workspace
+            lsandov1:
+              - job-read
+              - job-extended-read
+              - job-build
+              - job-cancel
+              - run-update
+    parameters:
+        - string:
+            name: TF_GERRIT_PROJECT
+            default: 'TF-A/trusted-firmware-a'
+        - string:
+            name: TF_GERRIT_BRANCH
+            default: 'refs/heads/master'
+        - string:
+            name: TF_GERRIT_REFSPEC
+            default: '+refs/heads/master:refs/remotes/origin/master'
+    scm:
+        - tf-a-ci-scripts
+        - trusted-firmware-a
+    wrappers:
+        - timestamps
+        - timeout:
+            timeout: 180
+            fail: true
+    builders:
+    - shell: |
+       #!/bin/bash
+       set -e
+
+       cat > env.param << EOF
+       GERRIT_PROJECT=${TF_GERRIT_PROJECT}
+       GERRIT_BRANCH=${TF_GERRIT_BRANCH}
+       GERRIT_REFSPEC=${TF_GERRIT_REFSPEC}
+       QA_SERVER_PROJECT=${JOB_NAME}
+       QA_SERVER_VERSION=${BUILD_NUMBER}
+       EOF
+
+       cd ${WORKSPACE}/trusted-firmware-a
+
+       # Executed project-related static checks: copyright presence, headers in alphabetical order,
+       # line endings, coding style and banned API.
+       IS_CONTINUOUS_INTEGRATION=1 ${WORKSPACE}/tf-a-ci-scripts/script/static-checks/static-checks.sh
+
+    - trigger-builds:
+      - project: tf-ci-gateway
+        block: false
+        # Execute Clang static analyzer (scan-build)
+        predefined-parameters: TEST_GROUPS=tf-l2-scan-build
+        property-file: env.param
+
+    publishers:
+        - archive:
+            artifacts: 'trusted-firmware-a/static-checks.log'
+        - groovy-postbuild:
+            script:
+                !include-raw:
+                  - tf-static-checks/postbuild.groovy
