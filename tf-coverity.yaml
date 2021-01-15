@@ -125,3 +125,7 @@
     publishers:
         - archive:
             artifacts: 'trusted-firmware-a/arm-tf-coverity-results.tgz, trusted-firmware-a/tf_coverage.log'
+        - groovy-postbuild:
+            script:
+                !include-raw:
+                  - tf-coverity/postbuild.groovy
