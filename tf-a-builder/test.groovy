@@ -15,7 +15,11 @@ def matcher = manager.getLogMatcher("TEST JOB URL: (?<url>.*?) TEST JOB ID: (?<j
 if (matcher?.matches()) {
     def testJobId = matcher.group('jobid')
     def testJobUrl = matcher.group('url')
-    def testDescription = "&nbsp;Test Job Id: <a href='${testJobUrl}'>${testJobId}</a>"
+    def testDescription = "<br >&nbsp;Test Job Id: <a href='${testJobUrl}'>${testJobId}</a>"
+
+    def rootUrl = manager.hudson.getRootUrl()
+    def lavaLogUrl = "${rootUrl}${manager.build.url}artifact/lava.log"
+    def lavaDescription = "<br >&nbsp;LAVA log: <a href='${lavaLogUrl}'>lava.log</a>"
 
     def causes = manager.build.getAction(hudson.model.CauseAction.class).getCauses()
     if (causes[0] instanceof hudson.model.Cause.UpstreamCause) {
@@ -24,16 +28,9 @@ if (matcher?.matches()) {
         def upstreamProject = rootCause.upstreamProject
         def jobName = upstreamProject
         def jobConfiguration = upstreamProject
-        def jobUrl = manager.hudson.getRootUrl() + "job/${upstreamProject}/${upstreamBuild}"
+        def jobUrl = "${rootUrl}job/${upstreamProject}/${upstreamBuild}"
         def jobDescription = "<br>&nbsp;Build <a href='${jobUrl}'>${upstreamProject} #${upstreamBuild}</a>"
 
-        manager.build.setDescription(testDescription + jobDescription)
-        def upstreamBuildInstance = hudson.model.Hudson.instance.getItem(jobName).getBuildByNumber(upstreamBuild)
-        upstreamBuildDescription = upstreamBuildInstance.getDescription()
-        if (null == upstreamBuildDescription) {
-            upstreamBuildDescription = "";
-        }
-        upstreamBuildDescription = upstreamBuildDescription + testDescription
-        upstreamBuildInstance.setDescription(upstreamBuildDescription)
+        manager.build.setDescription(testDescription + lavaDescription + jobDescription)
     }
 }

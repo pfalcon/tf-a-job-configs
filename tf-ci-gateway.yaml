@@ -75,8 +75,8 @@
         $CI_ROOT/script/gen_test_desc.py
     - trigger-builds:
       - project:
-        - tf-a-parameterized-builder
-        block: false
+        - tf-a-builder
+        block: true
         current-parameters: true
         property-file-fail-on-missing: false
         parameter-factories:
@@ -84,3 +84,25 @@
           parameter-name: TEST_DESC
           file-pattern: '*.test'
           no-files-found-action: FAIL
+
+    publishers:
+        - postbuildscript:
+            builders:
+                - role: MASTER
+                  build-on:
+                      - SUCCESS
+                      - FAILURE
+                      - UNSTABLE
+                      - ABORTED
+                      - NOT_BUILT
+                  build-steps:
+                      - shell: |-
+                          #!/bin/bash -e
+                          export CI_ROOT=${PWD}/tf-a-ci-scripts
+                          bash "$CI_ROOT/job/tf-ci-gateway/generate_report.sh"
+        - archive:
+            artifacts: report.json, report.html
+        - groovy-postbuild:
+            script:
+                !include-raw:
+                  - tf-ci-gateway/postbuild.groovy

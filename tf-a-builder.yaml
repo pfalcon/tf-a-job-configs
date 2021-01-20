@@ -128,6 +128,14 @@
             - text:
                 credential-id: QA_REPORTS_TOKEN
                 variable: QA_REPORTS_TOKEN
+        - credentials-binding:
+            - text:
+                credential-id: LAVA_USER_TF
+                variable: LAVA_USER
+        - credentials-binding:
+            - text:
+                credential-id: LAVA_TOKEN_TF
+                variable: LAVA_TOKEN
     builders:
         - shell:
             !include-raw: tf-a-builder/builders.sh
@@ -171,6 +179,17 @@
                                 properties-file: ${WORKSPACE}/post-build-lava.param
                             - shell:
                                 !include-raw: tf-a-builder/test.sh
+        - conditional-publisher:
+          - condition-kind: file-exists
+            on-evaluation-failure: dont-run
+            condition-filename: lava.log
+            condition-basedir: workspace
+            action:
+                - archive:
+                    artifacts: lava.log
+                    latest-only: false
+                    allow-empty: true
+
         - groovy-postbuild:
             script:
                 !include-raw:
