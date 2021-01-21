@@ -141,7 +141,7 @@
                 DEVICE_TYPE=fvp
                 CUSTOM_YAML_URL=${BUILD_URL}/artifact/artefacts/debug/job.yaml
                 DEVICE_TYPE=$(awk -F': ' '/device_type/ {print $2}' ${WORKSPACE}/artefacts/debug/job.yaml)
-                cat << EOF > ${WORKSPACE}/post-build-lava.param
+                cat << EOF > ${WORKSPACE}/lava.param
                 DEVICE_TYPE=${DEVICE_TYPE}
                 LAVA_SERVER=tf.validation.linaro.org
                 EOF
@@ -163,9 +163,9 @@
                               - SUCCESS
                           build-steps:
                             - inject:
-                                properties-file: ${WORKSPACE}/post-build-lava.param
+                                properties-file: ${WORKSPACE}/lava.param
                             - shell:
-                                !include-raw: tf-a-builder/test.sh
+                                !include-raw: tf-a-builder/squad.sh
         - conditional-publisher:
           - condition-kind: file-exists
             on-evaluation-failure: dont-run
@@ -179,4 +179,4 @@
         - groovy-postbuild:
             script:
                 !include-raw:
-                  - tf-a-builder/test.groovy
+                  - tf-a-builder/postbuild.groovy
