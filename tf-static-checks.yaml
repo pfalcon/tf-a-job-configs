@@ -24,7 +24,6 @@
             skip-tag: true
             shallow-clone: false
             wipe-workspace: false
-
 - job:
     name: tf-static-checks
     node: docker-amd64-tf-a-bionic
@@ -70,7 +69,6 @@
     - shell: |
        #!/bin/bash
        set -e
-
        cat > env.param << EOF
        GERRIT_PROJECT=${TF_GERRIT_PROJECT}
        GERRIT_BRANCH=${TF_GERRIT_BRANCH}
@@ -78,20 +76,16 @@
        QA_SERVER_PROJECT=${JOB_NAME}
        QA_SERVER_VERSION=${BUILD_NUMBER}
        EOF
-
        cd ${WORKSPACE}/trusted-firmware-a
-
        # Executed project-related static checks: copyright presence, headers in alphabetical order,
        # line endings, coding style and banned API.
        IS_CONTINUOUS_INTEGRATION=1 ${WORKSPACE}/tf-a-ci-scripts/script/static-checks/static-checks.sh
-
     - trigger-builds:
       - project: tf-ci-gateway
         block: false
         # Execute Clang static analyzer (scan-build)
         predefined-parameters: TEST_GROUPS=tf-l2-scan-build
         property-file: env.param
-
     publishers:
         - archive:
             artifacts: 'trusted-firmware-a/static-checks.log'

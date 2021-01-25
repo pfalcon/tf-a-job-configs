@@ -6,7 +6,6 @@
     days-to-keep: '180'
     num-to-keep: '180'
     exec-node: 'docker-amd64-tf-a-bionic'
-
 - scm:
     name: tf-a-ci-scripts
     scm:
@@ -33,8 +32,6 @@
             skip-tag: true
             shallow-clone: true
             wipe-workspace: false
-
-
 - job-template:
     name: '{name}-{static}'
     project-type: freestyle
@@ -61,7 +58,6 @@
         - trusted-firmware-a
     wrappers:
         - timestamps
-
     builders:
         - shell:  |
             #!/bin/bash
@@ -73,7 +69,6 @@
         - archive:
             artifacts: 'artefacts/**'
             latest-only: false
-
 - project:
     name: tf-a-static
     static:

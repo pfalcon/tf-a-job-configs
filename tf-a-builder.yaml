@@ -147,13 +147,10 @@
             steps:
             - shell:  |
                 #!/bin/bash
-
                 set -e
-
                 DEVICE_TYPE=fvp
                 CUSTOM_YAML_URL=${BUILD_URL}/artifact/artefacts/debug/job.yaml
                 DEVICE_TYPE=$(awk -F': ' '/device_type/ {print $2}' ${WORKSPACE}/artefacts/debug/job.yaml)
-
                 cat << EOF > ${WORKSPACE}/post-build-lava.param
                 DEVICE_TYPE=${DEVICE_TYPE}
                 LAVA_SERVER=tf.validation.linaro.org
@@ -189,9 +186,7 @@
                     artifacts: lava.log
                     latest-only: false
                     allow-empty: true
-
         - groovy-postbuild:
             script:
                 !include-raw:
                   - tf-a-builder/test.groovy
-

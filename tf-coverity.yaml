@@ -76,9 +76,7 @@
     builders:
         - shell: |
             #!/bin/bash
-
             set -e
-
             # Install crypto library
             CRYPTOCELL_LIB_PATH=/arm/projectscratch/ssg/trusted-fw
             mkdir -p ${CRYPTOCELL_LIB_PATH}
@@ -86,7 +84,6 @@
             curl --connect-timeout 5 --retry 5 --retry-delay 1 \
                  -sLSO -C - https://downloads.trustedfirmware.org/tf-a/dummy-crypto-lib.tar
             tar xf dummy-crypto-lib.tar
-
             # Fetch coverity tool and untar it
             COVERITY_VERSION=2019.03
             cd ${WORKSPACE}
@@ -97,11 +94,9 @@
             tar -xzf coverity_tool.tgz
             mv cov-analysis-linux64-${COVERITY_VERSION} coverity
             export PATH=${WORKSPACE}/coverity/bin:${PATH}
-
             # Run coverity
             cd ${WORKSPACE}/trusted-firmware-a
             ${WORKSPACE}/tf-a-ci-scripts/script/tf-coverity/run_coverity_on_tf.py --tf $(pwd)
-
         - conditional-step:
             condition-kind: boolean-expression
             condition-expression: "${UPLOAD_TO_COVERITY_SCAN_ONLINE}"
@@ -109,10 +104,8 @@
             steps:
             - shell: |
                 #!/bin/bash
-
                 echo "Uploading tarball to Coverity Scan Online..."
                 GIT_COMMIT=$(git rev-parse HEAD)
-
                 curl \
                   --form token=${{TF_COVERITY_SCAN_TOKEN}} \
                   --form email=sandrine.bailleux@arm.com \

@@ -53,9 +53,7 @@
     builders:
     - shell: |
         #!/bin/bash
-
         set -e
-
         cat << EOF > env.param
         GERRIT_PATCHSET_NUMBER=${GERRIT_PATCHSET_NUMBER}
         GERRIT_CHANGE_NUMBER=${GERRIT_CHANGE_NUMBER}
@@ -66,7 +64,6 @@
         TFTF_GERRIT_BRANCH=${GERRIT_BRANCH}
         TFTF_GERRIT_REFSPEC=${GERRIT_REFSPEC}
         EOF
-
     - multijob:
         condition: COMPLETED
         name: Build and static checks
@@ -78,7 +75,6 @@
             ENABLE_STATIC_CHECK=true
             REPO_UNDER_STATIC_CHECK=tf-a-tests
           property-file: env.param
-
     - multijob:
         condition: COMPLETED
         name: Run doc build check
@@ -88,7 +84,6 @@
           predefined-parameters: |
             TEST_GROUPS=tftf-l1-check-docs
           property-file: env.param
-
     - multijob:
         condition: COMPLETED
         name: Build TF-A-Tests
@@ -98,7 +93,6 @@
           predefined-parameters: |
             TEST_GROUPS=tftf-l1-build
           property-file: env.param
-
     - multijob:
         condition: COMPLETED
         name: Basic TF-A-Tests test cases
@@ -108,7 +102,6 @@
           predefined-parameters: |
             TEST_GROUPS=tftf-l1-fvp tftf-l1-juno
           property-file: env.param
-
     triggers:
     - gerrit:
         server-name: review.trustedfirmware.org

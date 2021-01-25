@@ -53,9 +53,7 @@
     builders:
     - shell: |
         #!/bin/bash
-
         set -e
-
         cat << EOF > env.param
         GERRIT_PATCHSET_NUMBER=${GERRIT_PATCHSET_NUMBER}
         GERRIT_CHANGE_NUMBER=${GERRIT_CHANGE_NUMBER}
@@ -66,7 +64,6 @@
         TF_GERRIT_BRANCH=${GERRIT_BRANCH}
         TF_GERRIT_REFSPEC=${GERRIT_REFSPEC}
         EOF
-
     - multijob:
         condition: COMPLETED
         name: Build and static checks
@@ -77,7 +74,6 @@
             TEST_GROUPS=tf-l2-scan-build
             ENABLE_STATIC_CHECK=true
           property-file: env.param
-
     - multijob:
         condition: COMPLETED
         name: Run doc build check
@@ -87,7 +83,6 @@
           predefined-parameters: |
             TEST_GROUPS=tf-l1-check-docs
           property-file: env.param
-
     - multijob:
         condition: COMPLETED
         name: Run build tests
@@ -97,7 +92,6 @@
           predefined-parameters: |
             TEST_GROUPS=tf-l1-build-fvp tf-l1-build-juno tf-l1-build-clang tf-l1-build-plat
           property-file: env.param
-
     - multijob:
         condition: COMPLETED
         name: Run boot tests
@@ -107,7 +101,6 @@
           predefined-parameters: |
             TEST_GROUPS=tf-l1-boot-tests-aarch32 tf-l1-boot-tests-bl2_el3 tf-l1-boot-tests-cortex tf-l1-boot-tests-foundation tf-l1-boot-tests-gicv2 tf-l1-boot-tests-juno tf-l1-boot-tests-misc
           property-file: env.param
-
     triggers:
     - gerrit:
         server-name: review.trustedfirmware.org

@@ -83,9 +83,7 @@
     builders:
     - shell: |
         #!/bin/bash
-
         set -e
-
         cat << EOF > tf-a-env.param
         GERRIT_PROJECT=${TF_GERRIT_PROJECT}
         GERRIT_BRANCH=${TF_GERRIT_BRANCH}
@@ -93,7 +91,6 @@
         QA_SERVER_PROJECT=${JOB_NAME}
         QA_SERVER_VERSION=${BUILD_NUMBER}
         EOF
-
         cat << EOF > tf-a-tests-env.param
         GERRIT_PROJECT=${TFTF_GERRIT_PROJECT}
         GERRIT_BRANCH=${TFTF_GERRIT_BRANCH}
@@ -101,7 +98,6 @@
         QA_SERVER_PROJECT=${JOB_NAME}
         QA_SERVER_VERSION=${BUILD_NUMBER}
         EOF
-
     - multijob:
         name: Run static checks on the code
         condition: COMPLETED
@@ -110,7 +106,6 @@
           current-parameters: true
           kill-phase-on: NEVER
           property-file: tf-a-env.param
-
     - multijob:
         name: Build Trusted Firmware
         condition: COMPLETED
@@ -136,7 +131,6 @@
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=tf-l1-build-clang
           property-file: tf-a-env.param
-
     - multijob:
         name: TFTF Tests
         condition: COMPLETED
@@ -161,7 +155,6 @@
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=tftf-l2-extensive-tests-fvp
           property-file: tf-a-tests-env.param
-
     - multijob:
         name: Boot up to the Linux shell prompt
         condition: COMPLETED
@@ -191,7 +184,6 @@
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=tf-l2-boot-tests-spm-mm
           property-file: tf-a-env.param
-
     - multijob:
         name: Boot up to the Linux shell prompt - Part 2
         condition: COMPLETED
@@ -221,7 +213,6 @@
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=tf-l2-boot-tests-bl2_el3
           property-file: tf-a-env.param
-
     - multijob:
         name: Miscellaneous tests
         condition: COMPLETED
@@ -246,7 +237,6 @@
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=tf-l3-boot-tests-misc
           property-file: tf-a-env.param
-
     - multijob:
         name: Code coverage
         condition: COMPLETED
@@ -256,7 +246,6 @@
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=tf-l3-code-coverage
           property-file: tf-a-env.param
-
     - multijob:
         name: Run doc build check
         condition: COMPLETED
@@ -266,7 +255,6 @@
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=tf-l1-check-docs
           property-file: tf-a-env.param
-
     # Run the unstable TF-A Tests at the end but do not let their results
     # participate in the job's success/failure.
     - trigger-builds:
@@ -281,7 +269,6 @@
             build-step-failure-threshold: never
             unstable-threshold: never
             failure-threshold: never
-
     # If all tests passed, catch up the master branch with integration
     - conditional-step:
         condition-kind: current-status

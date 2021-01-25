@@ -53,9 +53,7 @@
     builders:
     - shell: |
         #!/bin/bash
-
         set -e
-
         cat << EOF > env.param
         GERRIT_PATCHSET_NUMBER=${GERRIT_PATCHSET_NUMBER}
         GERRIT_CHANGE_NUMBER=${GERRIT_CHANGE_NUMBER}
@@ -66,7 +64,6 @@
         TFTF_GERRIT_BRANCH=${GERRIT_BRANCH}
         TFTF_GERRIT_REFSPEC=${GERRIT_REFSPEC}
         EOF
-
     - multijob:
         condition: COMPLETED
         name: Carry out level 1 tests
@@ -75,7 +72,6 @@
           name: tf-tftf-gerrit-tforg-l1
           current-parameters: true
           property-file: env.param
-
     - multijob:
         condition: COMPLETED
         name: Run Firmware Update Tests
@@ -86,7 +82,6 @@
             TEST_GROUPS=tftf-l2-fwu
             TFTF_REFSPEC=$GERRIT_REFSPEC
           property-file: env.param
-
     - multijob:
         condition: COMPLETED
         name: Run Level 2 testing of TF-A-Tests
@@ -97,7 +92,6 @@
             TEST_GROUPS=tftf-l2-fvp-auxiliary tftf-l2-juno tf-l2-boot-tests-spm-mm tftf-l2-fvp-dynamiq
             TFTF_REFSPEC=$GERRIT_REFSPEC
           property-file: env.param
-
     - multijob:
         condition: COMPLETED
         name: Run extensive TF-A-Tests
@@ -108,8 +102,6 @@
             TEST_GROUPS=tftf-l2-extensive-tests-fvp
             TFTF_REFSPEC=$GERRIT_REFSPEC
           property-file: env.param
-
-
     triggers:
     - gerrit:
         server-name: review.trustedfirmware.org
