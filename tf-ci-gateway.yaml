@@ -30,15 +30,7 @@
         max-per-node: 3
         max-total: 10
     - authorization:
-        anonymous:
-          - job-read
-          - job-extended-read
-        lsandov1:
-          - job-read
-          - job-extended-read
-          - job-build
-          - job-cancel
-          - run-update
+        !include: authorization.yaml.inc
     wrappers:
     - credentials-binding:
       - ssh-user-private-key:

@@ -40,15 +40,7 @@
         days-to-keep: 180
         num-to-keep: 180
     - authorization:
-        anonymous:
-          - job-read
-          - job-extended-read
-        lsandov1:
-          - job-read
-          - job-extended-read
-          - job-build
-          - job-cancel
-          - run-update
+        !include: authorization.yaml.inc
     parameters:
         - string:
             name: TF_GERRIT_PROJECT

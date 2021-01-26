@@ -51,17 +51,7 @@
             days-to-keep: 180
             num-to-keep: 3000
         - authorization:
-            anonymous:
-              - job-discover
-              - job-read
-              - job-extended-read
-              - job-workspace
-            lsandov1:
-              - job-read
-              - job-extended-read
-              - job-build
-              - job-cancel
-              - run-update
+            !include: authorization.yaml.inc
     parameters:
         - string:
             name: import_cc
