@@ -15,7 +15,7 @@ def matcher = manager.getLogMatcher("TEST JOB URL: (?<url>.*?) TEST JOB ID: (?<j
 if (matcher?.matches()) {
     def testJobId = matcher.group('jobid')
     def testJobUrl = matcher.group('url')
-    def testDescription = "<br >&nbsp;Test Job Id: <a href='${testJobUrl}'>${testJobId}</a>"
+    def testDescription = "&nbsp;Test Job Id: <a href='${testJobUrl}'>${testJobId}</a>"
 
     def rootUrl = manager.hudson.getRootUrl()
     def lavaLogUrl = "${rootUrl}${manager.build.url}artifact/lava.log"
