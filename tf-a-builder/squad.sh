@@ -2,6 +2,31 @@
 
 set -xe
 
+# Run the given command passed through parameters, if fails, try
+# at most more N-times with a pause of M-seconds until success.
+resilient_cmd() {
+    local cmd="$*"
+    local max_wait=10
+    local sleep_body=2
+    local iter=0
+
+    echo "Waiting for $cmd to complete"
+    while true; do
+        if ${cmd}; then
+            echo "$cmd job finished"
+            break
+        fi
+
+        sleep ${sleep_body}
+
+        iter=$(( iter + 1 ))
+        if [ ${iter} -ge ${max_wait} ]; then
+            return 1
+        fi
+    done
+    return 0
+}
+
 ls -l ${WORKSPACE}
 
 if [ -n "${QA_SERVER_VERSION}" ]; then
@@ -41,14 +66,9 @@ if [ -n "${QA_SERVER_VERSION}" ]; then
             if [ -n "${LAVAJOB_ID}" ]; then
                 echo "LAVA URL: https://${LAVA_SERVER}/scheduler/job/${LAVAJOB_ID} LAVA JOB ID: ${LAVAJOB_ID}"
 
-                lavacli identities add --username ${LAVA_USER} --token ${LAVA_TOKEN} --uri "https://${LAVA_SERVER}/RPC2" default
-
-                echo "Waiting for LAVA to complete"
-                lavacli jobs wait ${LAVAJOB_ID}
-                echo "LAVA job finished"
-
-                lavacli jobs logs ${LAVAJOB_ID} > "${WORKSPACE}/lava.log"
-                echo "LAVA job stored at ${WORKSPACE}/lava.log"
+                resilient_cmd lavacli identities add --username ${LAVA_USER} --token ${LAVA_TOKEN} --uri "https://${LAVA_SERVER}/RPC2" default
+                resilient_cmd lavacli jobs wait ${LAVAJOB_ID}
+                resilient_cmd lavacli jobs logs ${LAVAJOB_ID} > "${WORKSPACE}/lava.log"
             else
                 echo "LAVA Job ID could not be obtained"
             fi
