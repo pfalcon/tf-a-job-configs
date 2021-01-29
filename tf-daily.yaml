@@ -22,11 +22,14 @@
             name: TF_GERRIT_REFSPEC
             default: 'refs/heads/master'
         - string:
-            name: GERRIT_PATCHSET_NUMBER
-            default: ''
+            name: TFTF_GERRIT_PROJECT
+            default: 'TF-A/tf-a-tests'
         - string:
-            name: GERRIT_CHANGE_NUMBER
-            default: ''
+            name: TFTF_GERRIT_BRANCH
+            default: 'master'
+        - string:
+            name: TFTF_GERRIT_REFSPEC
+            default: 'refs/heads/master'
     wrappers:
         - timestamps
     builders:
