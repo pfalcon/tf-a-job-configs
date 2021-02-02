@@ -13,7 +13,7 @@
             wipe-workspace: false
 - job:
     name: tf-ci-gateway
-    node: master
+    node: docker-amd64-tf-a-bionic
     project-type: freestyle
     concurrent: true
     disabled: false
@@ -78,7 +78,7 @@
     publishers:
         - postbuildscript:
             builders:
-                - role: MASTER
+                - role: SLAVE
                   build-on:
                       - SUCCESS
                       - FAILURE
