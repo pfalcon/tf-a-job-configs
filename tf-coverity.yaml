@@ -51,6 +51,9 @@
         - string:
             name: TF_GERRIT_REFSPEC
             default: '+refs/heads/integration:refs/remotes/origin/integration'
+        - string:
+            name: COVERITY_VERSION
+            default: '2020.09'
         - bool:
             name: UPLOAD_TO_COVERITY_SCAN_ONLINE
             default: false
@@ -75,7 +78,6 @@
                  -sLSO -C - https://downloads.trustedfirmware.org/tf-a/dummy-crypto-lib.tar
             tar xf dummy-crypto-lib.tar
             # Fetch coverity tool and untar it
-            COVERITY_VERSION=2019.03
             cd ${WORKSPACE}
             wget https://scan.coverity.com/download/linux64 \
                 --quiet \
