@@ -2,6 +2,30 @@
 
 set -ex
 
+# Run the given command passed through parameters, if fails, try
+# at most more N-times with a pause of M-seconds until success.
+resilient_cmd() {
+    local cmd="$*"
+    local max_wait=10
+    local sleep_body=2
+    local iter=0
+
+    echo "Waiting for $cmd to complete"
+    while true; do
+        if ${cmd}; then
+            echo "$cmd job finished"
+            break
+        fi
+
+        sleep ${sleep_body}
+
+        iter=$(( iter + 1 ))
+        if [ ${iter} -ge ${max_wait} ]; then
+            return 1
+        fi
+    done
+    return 0
+}
 
 # FIXME workaround clone_repos.sh script when using gerrit
 unset GERRIT_PROJECT
@@ -44,18 +68,18 @@ project_filer="${nfs_volume}/projectscratch/ssg/trusted-fw"
 for d in spm spm-10-23-2020; do
     mkdir -p ${project_filer}/ci-files/$d
     cd ${project_filer}/ci-files/$d
-    curl --connect-timeout 5 --retry 5 --retry-delay 1 -fsSLo \
+    resilient_cmd curl --connect-timeout 5 --retry 5 --retry-delay 1 -fsSLo \
 	 download.json \
 	 ${tfa_downloads}/$d/?export=json
     for f in $(cat download.json | jq .files[].Url | sed s/\"//g); do
-        curl --connect-timeout 5 --retry 5 --retry-delay 1 -fsSLo  $(basename $f) $f
+        resilient_cmd curl --connect-timeout 5 --retry 5 --retry-delay 1 -fsSLo  $(basename $f) $f
     done
 done
 
 # FIXME: place below code in above loop
 # fetch https://downloads.trustedfirmware.org/tf-a/dummy-crypto-lib.tar
 cd ${project_filer}
-curl --connect-timeout 5 --retry 5 --retry-delay 1 -fsSLo \
+resilient_cmd curl --connect-timeout 5 --retry 5 --retry-delay 1 -fsSLo \
      dummy-crypto-lib.tar \
      https://downloads.trustedfirmware.org/tf-a/dummy-crypto-lib.tar
 tar xf dummy-crypto-lib.tar
@@ -63,7 +87,7 @@ tar xf dummy-crypto-lib.tar
 # fetch Juno rootfs, required by fvp
 linaro_2001_release="/nfs/downloads/linaro/20.01"
 cd ${linaro_2001_release}
-curl --connect-timeout 5 --retry 5 --retry-delay 1 -fsSLo \
+resilient_cmd curl --connect-timeout 5 --retry 5 --retry-delay 1 -fsSLo \
      lt-vexpress64-openembedded_minimal-armv8-gcc-5.2_20170127-761.img.gz \
      https://releases.linaro.org/openembedded/juno-lsk/latest/lt-vexpress64-openembedded_minimal-armv8-gcc-5.2_20170127-761.img.gz
 
