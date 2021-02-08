@@ -44,7 +44,6 @@ cd ${WORKSPACE}
 blocklist="blocklist.txt"
 cat << EOF > "${blocklist}"
 coverity-tf-misra
-tf-l2-boot-tests-juno%juno-tbb-mbedtls-romlib,juno-default,nil,nil:juno-tftf-romlib
 EOF
 
 if echo "${TEST_DESC}" | grep -f ${blocklist} - ; then
