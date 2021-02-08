@@ -1,0 +1,22 @@
+- view:
+    name: TF-A
+    view-type: list
+    job-name:
+     - tf-daily
+     - tf-main
+     - tf-coverity
+     - tf-gerrit-tforg-l1
+     - tf-gerrit-tforg-l2
+     - tf-tftf-gerrit-tforg-l1
+     - tf-tftf-gerrit-tforg-l2
+     - tf-ci-gateway
+     - tf-a-builder
+     - tf-static-checks
+    columns:
+        - status
+        - weather
+        - job
+        - last-success
+        - last-failure
+        - last-duration
+        - build-button
