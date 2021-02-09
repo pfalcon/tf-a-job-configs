@@ -23,10 +23,10 @@
             default: 'TF-A/trusted-firmware-a'
         - string:
             name: GERRIT_BRANCH
-            default: 'master'
+            default: 'refs/heads/integration'
         - string:
             name: GERRIT_REFSPEC
-            default: 'refs/heads/master'
+            default: '+refs/heads/integration:refs/remotes/origin/integration'
         - string:
             name: GERRIT_PATCHSET_NUMBER
             default: ''
