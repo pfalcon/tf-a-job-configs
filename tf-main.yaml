@@ -47,19 +47,19 @@
             default: 'TF-A/trusted-firmware-a'
         - string:
             name: TF_GERRIT_BRANCH
-            default: 'refs/heads/integration'
+            default: 'master'
         - string:
             name: TF_GERRIT_REFSPEC
-            default: '+refs/heads/integration:refs/remotes/origin/integration'
+            default: 'refs/heads/master'
         - string:
             name: TFTF_GERRIT_PROJECT
             default: 'TF-A/tf-a-tests'
         - string:
             name: TFTF_GERRIT_BRANCH
-            default: 'refs/heads/integration'
+            default: 'master'
         - string:
             name: TFTF_GERRIT_REFSPEC
-            default: '+refs/heads/integration:refs/remotes/origin/integration'
+            default: 'refs/heads/master'
     scm:
         - tf-a-ci-scripts
         - trusted-firmware-a
