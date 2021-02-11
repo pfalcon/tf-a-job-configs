@@ -114,6 +114,9 @@
         - tf-a-tests
     wrappers:
         - timestamps
+        - timeout:
+            timeout: 120
+            fail: true
         - credentials-binding:
             - text:
                 credential-id: QA_REPORTS_TOKEN
