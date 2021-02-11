@@ -69,6 +69,14 @@ if [ -n "${QA_SERVER_VERSION}" ]; then
                 resilient_cmd lavacli identities add --username ${LAVA_USER} --token ${LAVA_TOKEN} --uri "https://${LAVA_SERVER}/RPC2" default
                 resilient_cmd lavacli jobs wait ${LAVAJOB_ID}
                 resilient_cmd lavacli jobs logs ${LAVAJOB_ID} > "${WORKSPACE}/lava.log"
+
+		# Fetch and store LAVA job result (1 failure, 0 success)
+		resilient_cmd lavacli results ${LAVAJOB_ID} | tee "${WORKSPACE}/lava.res"
+		if grep '\[fail\]' "${WORKSPACE}/lava.res"; then
+		    echo "LAVA JOB RESULT: 1"
+		else
+		    echo "LAVA JOB RESULT: 0"
+		fi
             else
                 echo "LAVA Job ID could not be obtained"
             fi

@@ -33,4 +33,14 @@ if (matcher?.matches()) {
 
         manager.build.setDescription(testDescription + lavaDescription + jobDescription)
     }
+
+    // Verify LAVA jobs results, all tests must pass, otherwise turn build into UNSTABLE
+    def testMatcher = manager.getLogMatcher("LAVA JOB RESULT: (?<result>\\d+)")
+    if (testMatcher?.matches()) {
+        def testJobSuiteResult = testMatcher.group('result')
+        // result = 1 means lava job fails
+        if (testJobSuiteResult == "1") {
+            manager.buildFailure()
+        }
+    }
 }
