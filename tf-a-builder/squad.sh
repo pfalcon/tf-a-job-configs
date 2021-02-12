@@ -51,34 +51,43 @@ if [ -n "${QA_SERVER_VERSION}" ]; then
     if [ -n "${TESTJOB_ID}" ]; then
         echo "TEST JOB URL: ${QA_SERVER}/testjob/${TESTJOB_ID} TEST JOB ID: ${TESTJOB_ID}"
 
-        # The below sleep command is intentional: LAVA could be under heavy load so previous job creation can
-        # take 'some' time
-        sleep 2
 
-        LAVAJOB_ID=$(curl --retry 4 ${QA_SERVER}/api/testjobs/${TESTJOB_ID}/?fields=job_id)
+        # The below loop with a sleep is intentional: LAVA could be under heavy load so previous job creation can
+        # take 'some' time to get the right numeric LAVA JOB ID
+        renumber='^[0-9]+$'
+        LAVAJOB_ID="null"
+        iter=0
+        max_tries=10
+        while ! [[ $LAVAJOB_ID =~ $renumber ]]; do
+            if [ $iter -eq $max_tries ] ; then
+                LAVAJOB_ID=''
+                break
+            fi
+            sleep 2
+            LAVAJOB_ID=$(curl --retry 4 ${QA_SERVER}/api/testjobs/${TESTJOB_ID}/?fields=job_id)
+
+            # Get the job_id value (whatever it is)
+            LAVAJOB_ID=$(echo ${LAVAJOB_ID} | jq '.job_id')
+            LAVAJOB_ID="${LAVAJOB_ID//\"/}"
+
+            iter=$(( iter + 1 ))
+        done
 
         # check that rest query at least get non-empty value
         if [ -n "${LAVAJOB_ID}" ]; then
 
-            # Get the numeric ID
-            LAVAJOB_ID=$(echo ${LAVAJOB_ID} | jq '.job_id')
-            LAVAJOB_ID="${LAVAJOB_ID//\"/}"
-            if [ -n "${LAVAJOB_ID}" ]; then
-                echo "LAVA URL: https://${LAVA_SERVER}/scheduler/job/${LAVAJOB_ID} LAVA JOB ID: ${LAVAJOB_ID}"
+            echo "LAVA URL: https://${LAVA_SERVER}/scheduler/job/${LAVAJOB_ID} LAVA JOB ID: ${LAVAJOB_ID}"
 
-                resilient_cmd lavacli identities add --username ${LAVA_USER} --token ${LAVA_TOKEN} --uri "https://${LAVA_SERVER}/RPC2" default
-                resilient_cmd lavacli jobs wait ${LAVAJOB_ID}
-                resilient_cmd lavacli jobs logs ${LAVAJOB_ID} > "${WORKSPACE}/lava.log"
+            resilient_cmd lavacli identities add --username ${LAVA_USER} --token ${LAVA_TOKEN} --uri "https://${LAVA_SERVER}/RPC2" default
+            resilient_cmd lavacli jobs wait ${LAVAJOB_ID}
+            resilient_cmd lavacli jobs logs ${LAVAJOB_ID} > "${WORKSPACE}/lava.log"
 
-		# Fetch and store LAVA job result (1 failure, 0 success)
-		resilient_cmd lavacli results ${LAVAJOB_ID} | tee "${WORKSPACE}/lava.res"
-		if grep '\[fail\]' "${WORKSPACE}/lava.res"; then
-		    echo "LAVA JOB RESULT: 1"
-		else
-		    echo "LAVA JOB RESULT: 0"
-		fi
+            # Fetch and store LAVA job result (1 failure, 0 success)
+            resilient_cmd lavacli results ${LAVAJOB_ID} | tee "${WORKSPACE}/lava.res"
+            if grep '\[fail\]' "${WORKSPACE}/lava.res"; then
+                echo "LAVA JOB RESULT: 1"
             else
-                echo "LAVA Job ID could not be obtained"
+                echo "LAVA JOB RESULT: 0"
             fi
         else
             echo "LAVA Job ID could not be obtained"
