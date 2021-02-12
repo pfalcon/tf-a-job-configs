@@ -161,6 +161,7 @@ export tf_config="$(echo "${build_config}" | awk -F, '{print $1}')"
 export tftf_config="$(echo "${build_config}" | awk -F, '{print $2}')"
 export scp_config="$(echo "${build_config}" | awk -F, '{print $3}')"
 export scp_tools="$(echo "${build_config}" | awk -F, '{print $4}')"
+export spm_config="$(echo "${build_config}" | awk -F, '{print $5}')"
 
 export run_config="${rhs%.test}"
 
