@@ -124,9 +124,6 @@ export workspace="${workspace:-${WORKSPACE}/workspace}"
 # 'distlcean' on every invocation.
 export dont_clean="${dont_clean:-1}"
 
-# During feature development, we typically only build in debug mode.
-export bin_mode="${bin_mode:-debug}"
-
 # Local paths to TF and TFTF repositories
 export tf_root="${tf_root:-${WORKSPACE}/trusted-firmware-a}"
 export tftf_root="${tftf_root:-${WORKSPACE}/tf-a-tests}"
