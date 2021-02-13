@@ -81,7 +81,7 @@
         - kill-phase-on: NEVER
           name: tf-ci-gateway
           predefined-parameters: |
-            TEST_GROUPS=tftf-l1-fvp tftf-l1-juno tftf-l2-fvp-auxiliary tftf-l2-fvp-dynamiq tftf-l2-fwu
+            TEST_GROUPS=tftf-l1-fvp tftf-l1-juno tftf-l2-fvp-auxiliary tftf-l2-fvp-dynamiq tftf-l2-fwu tftf-l2-fvp
             TF_REFSPEC=$GERRIT_REFSPEC
           property-file: env.param
     - multijob:
