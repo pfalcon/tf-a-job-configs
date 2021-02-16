@@ -176,6 +176,11 @@
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=tf-l2-boot-tests-spm-mm
           property-file: tf-a-env.param
+        - name: tf-ci-gateway
+          current-parameters: true
+          kill-phase-on: NEVER
+          predefined-parameters: TEST_GROUPS=spm-l2-boot-tests
+          property-file: tf-a-env.param
     - multijob:
         name: Boot up to the Linux shell prompt - Part 2
         condition: COMPLETED
@@ -228,6 +233,11 @@
           current-parameters: true
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=tf-l3-boot-tests-misc
+          property-file: tf-a-env.param
+        - name: tf-ci-gateway
+          current-parameters: true
+          kill-phase-on: NEVER
+          predefined-parameters: TEST_GROUPS=spm-l3-boot-tests
           property-file: tf-a-env.param
     - multijob:
         name: Code coverage
