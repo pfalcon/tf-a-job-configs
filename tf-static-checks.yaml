@@ -72,7 +72,7 @@
        IS_CONTINUOUS_INTEGRATION=1 ${WORKSPACE}/tf-a-ci-scripts/script/static-checks/static-checks.sh
     - trigger-builds:
       - project: tf-ci-gateway
-        block: false
+        block: true
         # Execute Clang static analyzer (scan-build)
         predefined-parameters: TEST_GROUPS=tf-l2-scan-build
         property-file: env.param
