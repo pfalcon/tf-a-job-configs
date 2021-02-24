@@ -40,4 +40,4 @@
               block: true
               current-parameters: true
     triggers:
-        - timed: H H(0-6) * * 1-5
+        - timed: 'H 19 * * *'
