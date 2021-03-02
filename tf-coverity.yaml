@@ -38,7 +38,7 @@
       This job runs <b>every weekday</b> and by default uses the <b>integration</b> branch on trustedfirmware.org.
     properties:
         - build-discarder:
-            days-to-keep: 7
+            days-to-keep: 14
         - authorization:
             !include: authorization.yaml.inc
     parameters:

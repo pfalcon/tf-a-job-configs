@@ -22,8 +22,7 @@
       Main job entry point for a Trusted Firmware A (TF-A) CI.
     properties:
     - build-discarder:
-        days-to-keep: 180
-        num-to-keep: 180
+        days-to-keep: 14
     - throttle:
         option: project
         enabled: true

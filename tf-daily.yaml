@@ -7,8 +7,8 @@
     description: Triggers tf-main and tf-coverity for the TF-A project.
     properties:
     - build-discarder:
-        days-to-keep: 7
-        num-to-keep: 30
+        days-to-keep: 14
+        num-to-keep: 60
     - authorization:
         !include: authorization.yaml.inc
     parameters:

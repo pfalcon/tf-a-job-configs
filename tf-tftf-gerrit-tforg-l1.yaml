@@ -13,8 +13,7 @@
         enabled: true
         max-total: 5
     - build-discarder:
-        days-to-keep: 180
-        num-to-keep: 180
+        days-to-keep: 14
     - authorization:
         !include: authorization.yaml.inc
     parameters:

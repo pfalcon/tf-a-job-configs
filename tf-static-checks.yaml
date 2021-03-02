@@ -34,7 +34,7 @@
     description: Run static checks on Git repository
     properties:
         - build-discarder:
-            days-to-keep: 7
+            days-to-keep: 14
         - authorization:
             !include: authorization.yaml.inc
     parameters:
