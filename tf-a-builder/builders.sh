@@ -41,12 +41,18 @@ cd ${WORKSPACE}
 
 # Several test descriptions are pending to be included in OpenCI, so for the moment
 # blocklist these.
+# 1. coverity-tf-misra: https://projects.linaro.org/browse/TFC-10
+# 2. tf-l3-code-coverage: Missing library in Open CI, introduced by
+#    https://git.trustedfirmware.org/ci/tf-a-ci-scripts.git/commit/?id=024efd51f025b8446e87c9adf99bd770dc769d99
+# 3. fvp-tbb-mbedtls-upcounter,fvp-fwu:fvp-tftf.fwu-aemv8a.invalid_nvcounter-debug: Pending TFC ticket
 blocklist="blocklist.txt"
 cat << EOF > "${blocklist}"
 coverity-tf-misra
+tf-l3-code-coverage
+fvp-tbb-mbedtls-upcounter,fvp-fwu,nil,nil,nil:fvp-tftf.fwu-aemv8a.invalid_nvcounter-debug
 EOF
 
-if echo "${TEST_DESC}" | grep -f ${blocklist} - ; then
+if echo "${TEST_DESC}" | grep -F -f ${blocklist} - ; then
     echo ${TEST_DESC} is blocklisted
     exit 0
 fi
