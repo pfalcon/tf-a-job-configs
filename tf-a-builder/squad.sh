@@ -79,15 +79,26 @@ if [ -n "${QA_SERVER_VERSION}" ]; then
             echo "LAVA URL: https://${LAVA_SERVER}/scheduler/job/${LAVAJOB_ID} LAVA JOB ID: ${LAVAJOB_ID}"
 
             resilient_cmd lavacli identities add --username ${LAVA_USER} --token ${LAVA_TOKEN} --uri "https://${LAVA_SERVER}/RPC2" default
-            resilient_cmd lavacli jobs wait ${LAVAJOB_ID}
-            resilient_cmd lavacli jobs logs ${LAVAJOB_ID} > "${WORKSPACE}/lava.log"
 
-            # Fetch and store LAVA job result (1 failure, 0 success)
-            resilient_cmd lavacli results ${LAVAJOB_ID} | tee "${WORKSPACE}/lava.res"
-            if grep '\[fail\]' "${WORKSPACE}/lava.res"; then
+            # timeout at 3600 secs (1 hour)
+            timeout_seconds=3600
+            wait_cmd="timeout $timeout_seconds lavacli jobs wait ${LAVAJOB_ID}"
+
+            # if timeout on waiting for LAVA to complete, create an 'artificial' lava.log indicating
+            # job ID and timeout seconds
+            if ! $wait_cmd ; then
+                echo "Stopped monitoring LAVA JOB ${LAVAJOB_ID} after ${timeout_seconds} seconds, likely stuck or timeout too short?" > "${WORKSPACE}/lava.log"
                 echo "LAVA JOB RESULT: 1"
             else
-                echo "LAVA JOB RESULT: 0"
+                resilient_cmd lavacli jobs logs ${LAVAJOB_ID} > "${WORKSPACE}/lava.log"
+
+                # Fetch and store LAVA job result (1 failure, 0 success)
+                resilient_cmd lavacli results ${LAVAJOB_ID} | tee "${WORKSPACE}/lava.res"
+                if grep '\[fail\]' "${WORKSPACE}/lava.res"; then
+                    echo "LAVA JOB RESULT: 1"
+                else
+                    echo "LAVA JOB RESULT: 0"
+                fi
             fi
         else
             echo "LAVA Job ID could not be obtained"
