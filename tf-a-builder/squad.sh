@@ -93,11 +93,15 @@ if [ -n "${QA_SERVER_VERSION}" ]; then
                 resilient_cmd lavacli jobs logs ${LAVAJOB_ID} > "${WORKSPACE}/lava.log"
 
                 # Fetch and store LAVA job result (1 failure, 0 success)
-                resilient_cmd lavacli results ${LAVAJOB_ID} | tee "${WORKSPACE}/lava.res"
-                if grep '\[fail\]' "${WORKSPACE}/lava.res"; then
-                    echo "LAVA JOB RESULT: 1"
+                resilient_cmd lavacli jobs show ${LAVAJOB_ID} | tee "${WORKSPACE}/lava.show"
+                if grep 'state.*: Finished' "${WORKSPACE}/lava.show"; then
+                    if grep 'Health.*: Complete' "${WORKSPACE}/lava.show"; then
+                        echo "LAVA JOB RESULT: 0"
+                    else
+                        echo "LAVA JOB RESULT: 1"
+                    fi
                 else
-                    echo "LAVA JOB RESULT: 0"
+                    echo "LAVA JOB RESULT: 1"
                 fi
             fi
         else
