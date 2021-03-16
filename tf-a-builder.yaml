@@ -49,7 +49,6 @@
     properties:
         - build-discarder:
             days-to-keep: 14
-            num-to-keep: 3000
         - authorization:
             !include: authorization.yaml.inc
     parameters:
