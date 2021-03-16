@@ -180,7 +180,7 @@ bash $bash_opts "$ci_root/script/run_local_ci.sh"
 
 # compress rootfs.bin file
 for a in $(find ${workspace} -type d -name artefacts); do
-    for r in $(find $a -type f -name rootfs.bin); do
+    for r in $(find $a -type f -name rootfs.bin -or -name busybox.bin); do
 	d=$(dirname $r); b=$(basename $r); cd "$d" && gzip "$b"
     done
 done
