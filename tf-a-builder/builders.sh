@@ -158,25 +158,23 @@ test_desc="${test_desc%%.test}"
 lhs="$(echo "$test_desc" | awk -F: '{print $1}')"
 rhs="$(echo "$test_desc" | awk -F: '{print $2}')"
 
-export test_group="$(echo "$lhs" | awk -F% '{print $2}')"
-
-# Test descriptors are always generated in the following order:
-#  tf_config, tftf_config, scp_config, scp_tools
+test_group="$(echo "$lhs" | awk -F% '{print $2}')"
 build_config="$(echo "$lhs" | awk -F% '{print $3}')"
-export tf_config="$(echo "${build_config}" | awk -F, '{print $1}')"
-export tftf_config="$(echo "${build_config}" | awk -F, '{print $2}')"
-export scp_config="$(echo "${build_config}" | awk -F, '{print $3}')"
-export scp_tools="$(echo "${build_config}" | awk -F, '{print $4}')"
-export spm_config="$(echo "${build_config}" | awk -F, '{print $5}')"
+run_config="${rhs%.test}"
+test_config="$(cat $WORKSPACE/TEST_DESC)"
 
-export run_config="${rhs%.test}"
+export BUILD_CONFIG="$build_config"
+export RUN_CONFIG="$run_config"
+export TEST_CONFIG="$test_config"
+export TEST_GROUP="$test_group"
 
 # Run this script bash -x, and it gets passed downstream for debugging
 if echo "$-" | grep -q "x"; then
   bash_opts="-x"
 fi
 
-bash $bash_opts "$ci_root/script/run_local_ci.sh"
+mkdir -p "${workspace}"
+bash $bash_opts "$ci_root/script/build_package.sh"
 
 # compress rootfs.bin file
 for a in $(find ${workspace} -type d -name artefacts); do
