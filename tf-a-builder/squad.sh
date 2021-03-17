@@ -80,8 +80,8 @@ if [ -n "${QA_SERVER_VERSION}" ]; then
 
             resilient_cmd lavacli identities add --username ${LAVA_USER} --token ${LAVA_TOKEN} --uri "https://${LAVA_SERVER}/RPC2" default
 
-            # timeout at 3600 secs (1 hour)
-            timeout_seconds=3600
+            # timeout at 5400 secs (1.5 hours)
+            timeout_seconds=5400
             wait_cmd="timeout $timeout_seconds lavacli jobs wait ${LAVAJOB_ID}"
 
             # if timeout on waiting for LAVA to complete, create an 'artificial' lava.log indicating
