@@ -60,7 +60,7 @@
         name: Carry out level 1 tests
         projects:
         - kill-phase-on: NEVER
-          name: tf-tftf-gerrit-tforg-l1
+          name: tf-gerrit-tforg-l1
           current-parameters: true
           property-file: env.param
     - multijob:
