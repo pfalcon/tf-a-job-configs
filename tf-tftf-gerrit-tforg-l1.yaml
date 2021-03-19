@@ -60,11 +60,9 @@
         name: Build and static checks
         projects:
         - kill-phase-on: NEVER
-          name: tf-ci-gateway
+          name: tf-static-checks
           predefined-parameters: |-
-            TEST_GROUPS=tf-l2-scan-build
-            ENABLE_STATIC_CHECK=true
-            REPO_UNDER_STATIC_CHECK=tf-a-tests
+            REPO_UNDER_TEST=tf-a-tests
           property-file: env.param
     - multijob:
         condition: COMPLETED
