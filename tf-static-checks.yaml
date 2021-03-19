@@ -24,6 +24,19 @@
             skip-tag: true
             shallow-clone: false
             wipe-workspace: false
+- scm:
+    name: tf-a-tests
+    scm:
+       - git:
+            url: https://review.trustedfirmware.org/${TFTF_GERRIT_PROJECT}
+            refspec: ${TFTF_GERRIT_REFSPEC}
+            name: origin
+            branches:
+                - ${TFTF_GERRIT_BRANCH}
+            basedir: tf-a-tests
+            skip-tag: true
+            shallow-clone: false
+            wipe-workspace: false
 - job:
     name: tf-static-checks
     node: docker-amd64-tf-a-bionic
@@ -47,9 +60,27 @@
         - string:
             name: TF_GERRIT_REFSPEC
             default: '+refs/heads/integration:refs/remotes/origin/integration'
+        - string:
+            name: TFTF_GERRIT_PROJECT
+            default: 'TF-A/tf-a-tests'
+        - string:
+            name: TFTF_GERRIT_BRANCH
+            default: 'refs/heads/master'
+        - string:
+            name: TFTF_GERRIT_REFSPEC
+            default: '+refs/heads/master:refs/remotes/origin/master'
+        - choice:
+            name: REPO_UNDER_TEST
+            choices:
+                - trusted-firmware-a
+                - tf-a-tests
+            default: trusted-firmware-a
+            description: |-
+                Repository to run static checks on.
     scm:
         - tf-a-ci-scripts
         - trusted-firmware-a
+        - tf-a-tests
     wrappers:
         - timestamps
         - timeout:
@@ -59,26 +90,30 @@
     - shell: |
        #!/bin/bash
        set -e
-       cat > env.param << EOF
+       if [[ "${REPO_UNDER_TEST}" == trusted-firmware-a ]]; then
+       cat <<EOF > env.param
+       QA_SERVER_PROJECT=${JOB_NAME}
+       QA_SERVER_VERSION=${BUILD_NUMBER}
        GERRIT_PROJECT=${TF_GERRIT_PROJECT}
        GERRIT_BRANCH=${TF_GERRIT_BRANCH}
        GERRIT_REFSPEC=${TF_GERRIT_REFSPEC}
-       QA_SERVER_PROJECT=${JOB_NAME}
-       QA_SERVER_VERSION=${BUILD_NUMBER}
+       TEST_GROUPS=tf-l2-scan-build
        EOF
-       cd ${WORKSPACE}/trusted-firmware-a
+       fi
+       cd ${WORKSPACE}/${REPO_UNDER_TEST}
        # Executed project-related static checks: copyright presence, headers in alphabetical order,
        # line endings, coding style and banned API.
        IS_CONTINUOUS_INTEGRATION=1 ${WORKSPACE}/tf-a-ci-scripts/script/static-checks/static-checks.sh
     - trigger-builds:
       - project: tf-ci-gateway
         block: true
-        # Execute Clang static analyzer (scan-build)
-        predefined-parameters: TEST_GROUPS=tf-l2-scan-build
         property-file: env.param
+        # Do not trigger tf-ci-gateway if env.param file does not exist,
+        # which is the case here for TF-A Tests repository
+        property-file-fail-on-missing: True
     publishers:
         - archive:
-            artifacts: 'trusted-firmware-a/static-checks.log'
+            artifacts: '${REPO_UNDER_TEST}/static-checks.log'
         - groovy-postbuild:
             script:
                 !include-raw:

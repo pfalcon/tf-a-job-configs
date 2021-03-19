@@ -19,7 +19,8 @@ def findRealUrl(url) {
   return url
 }
 
-def artifact = "trusted-firmware-a/static-checks.log"
+def repo_under_test = manager.build.buildVariables.get('REPO_UNDER_TEST')
+def artifact = "${repo_under_test}/static-checks.log"
 def jobUrl = manager.hudson.getRootUrl() + "${manager.build.url}artifact/${artifact}"
 def url = new URL(jobUrl)
 def realUrl = findRealUrl(url)
