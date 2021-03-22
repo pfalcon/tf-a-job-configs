@@ -261,7 +261,6 @@
     # participate in the job's success/failure.
     - trigger-builds:
         - project: tf-ci-gateway
-          same-node: True
           current-parameters: True
           property-file: tf-a-tests-env.param
           property-file-fail-on-missing: True
