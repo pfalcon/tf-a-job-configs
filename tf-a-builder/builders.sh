@@ -45,11 +45,18 @@ cd ${WORKSPACE}
 # 2. tf-l3-code-coverage: Missing library in Open CI, introduced by
 #    https://git.trustedfirmware.org/ci/tf-a-ci-scripts.git/commit/?id=024efd51f025b8446e87c9adf99bd770dc769d99
 # 3. fvp-tbb-mbedtls-upcounter,fvp-fwu:fvp-tftf.fwu-aemv8a.invalid_nvcounter-debug: Pending TFC ticket
+# 4. Failure at LAVA job https://tf.validation.linaro.org/scheduler/job/142122
+#    TFC ticket https://projects.linaro.org/browse/TFC-70
+# 5. Failure at LAVA job https://tf.validation.linaro.org/scheduler/job/142101
+#    TFC ticket https://projects.linaro.org/browse/TFC-70
+
 blocklist="blocklist.txt"
 cat << EOF > "${blocklist}"
 coverity-tf-misra
 tf-l3-code-coverage
 fvp-tbb-mbedtls-upcounter,fvp-fwu,nil,nil,nil:fvp-tftf.fwu-aemv8a.invalid_nvcounter-debug
+fvp-mb-256-optee-romlib,nil,nil,nil,nil:fvp-optee.mb-linux.rootfs+ftpm-romlib-fip.ftpm-aemv8a
+fvp-linux-as-bl33,nil,nil,nil,nil:fvp-linux.bl33-dtb-aemv8a.linux.bl33-debug
 EOF
 
 if echo "${TEST_DESC}" | grep -F -f ${blocklist} - ; then
