@@ -2,6 +2,27 @@
 
 set -xe
 
+# Wait for the LAVA job to finished
+# By default, timeout at 5400 secs (1.5 hours) and monitor every 60 seconds
+wait_lava_job() {
+    local id=$1
+    local timeout="${2:-5400}"
+    local interval="${3:-60}"
+
+    (( t = timeout ))
+
+    while ((t > 0)); do
+        sleep $interval
+        resilient_cmd lavacli jobs show $id | tee "${WORKSPACE}/lava-progress.show"
+        if grep 'state.*: Finished' "${WORKSPACE}/lava-progress.show"; then
+            echo finished
+            return
+        fi
+        ((t -= interval))
+    done
+    echo timeout
+}
+
 # Run the given command passed through parameters, if fails, try
 # at most more N-times with a pause of M-seconds until success.
 resilient_cmd() {
@@ -10,10 +31,8 @@ resilient_cmd() {
     local sleep_body=2
     local iter=0
 
-    echo "Waiting for $cmd to complete"
     while true; do
         if ${cmd}; then
-            echo "$cmd job finished"
             break
         fi
 
@@ -80,14 +99,12 @@ if [ -n "${QA_SERVER_VERSION}" ]; then
 
             resilient_cmd lavacli identities add --username ${LAVA_USER} --token ${LAVA_TOKEN} --uri "https://${LAVA_SERVER}/RPC2" default
 
-            # timeout at 5400 secs (1.5 hours)
-            timeout_seconds=5400
-            wait_cmd="timeout $timeout_seconds lavacli jobs wait ${LAVAJOB_ID}"
+	    wait_status="$(wait_lava_job ${LAVAJOB_ID})"
 
             # if timeout on waiting for LAVA to complete, create an 'artificial' lava.log indicating
             # job ID and timeout seconds
-            if ! $wait_cmd ; then
-                echo "Stopped monitoring LAVA JOB ${LAVAJOB_ID} after ${timeout_seconds} seconds, likely stuck or timeout too short?" > "${WORKSPACE}/lava.log"
+            if [ "${wait_status}" == "timeout" ]; then
+                echo "Stopped monitoring LAVA JOB ${LAVAJOB_ID}, likely stuck or timeout too short?" > "${WORKSPACE}/lava.log"
                 echo "LAVA JOB RESULT: 1"
             else
                 resilient_cmd lavacli jobs logs ${LAVAJOB_ID} > "${WORKSPACE}/lava.log"
