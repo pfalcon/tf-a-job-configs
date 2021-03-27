@@ -107,7 +107,11 @@ if [ -n "${QA_SERVER_VERSION}" ]; then
                 echo "Stopped monitoring LAVA JOB ${LAVAJOB_ID}, likely stuck or timeout too short?" > "${WORKSPACE}/lava.log"
                 echo "LAVA JOB RESULT: 1"
             else
-                resilient_cmd lavacli jobs logs ${LAVAJOB_ID} > "${WORKSPACE}/lava.log"
+                # Retrieve the test job plain log which is a yaml format file from LAVA
+                resilient_cmd lavacli jobs logs --raw ${LAVAJOB_ID} > "${WORKSPACE}/lava-raw.log"
+
+                # Split the UART messages to the corresponding log files
+                ${WORKSPACE}/tf-a-job-configs/tf-a-builder/log-splitter.py "${WORKSPACE}/lava-raw.log" 
 
                 # Fetch and store LAVA job result (1 failure, 0 success)
                 resilient_cmd lavacli jobs show ${LAVAJOB_ID} | tee "${WORKSPACE}/lava.show"

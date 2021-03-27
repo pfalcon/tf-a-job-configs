@@ -12,6 +12,19 @@
             shallow-clone: true
             wipe-workspace: false
 - scm:
+    name: tf-a-job-configs
+    scm:
+        - git:
+            url: https://git.trustedfirmware.org/ci/tf-a-job-configs.git
+            refspec: +refs/heads/master:refs/remotes/origin/master
+            name: origin
+            branches:
+                - refs/heads/master
+            basedir: tf-a-job-configs
+            skip-tag: true
+            shallow-clone: true
+            wipe-workspace: false
+- scm:
     name: trusted-firmware-a
     scm:
         - git:
@@ -108,6 +121,7 @@
             default: 'https://qa-reports.linaro.org'
     scm:
         - tf-a-ci-scripts
+        - tf-a-job-configs
         - trusted-firmware-a
         - tf-a-tests
     wrappers:
@@ -174,7 +188,7 @@
             condition-basedir: workspace
             action:
                 - archive:
-                    artifacts: lava.log
+                    artifacts: lava.log, lava-uart?.log
                     latest-only: false
                     allow-empty: true
         - groovy-postbuild:
