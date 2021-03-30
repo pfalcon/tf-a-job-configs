@@ -21,6 +21,7 @@
             branches:
                 - ${TF_GERRIT_BRANCH}
             basedir: trusted-firmware-a
+            choosing-strategy: gerrit
             skip-tag: true
             shallow-clone: false
             wipe-workspace: false
@@ -28,12 +29,13 @@
     name: tf-a-tests
     scm:
         - git:
-            url: https://git.trustedfirmware.org/${TFTF_GERRIT_PROJECT}
+            url: https://review.trustedfirmware.org/${TFTF_GERRIT_PROJECT}
             refspec: ${TFTF_GERRIT_REFSPEC}
             name: origin
             branches:
                 - ${TFTF_GERRIT_BRANCH}
             basedir: tf-a-tests
+            choosing-strategy: gerrit
             skip-tag: true
             shallow-clone: false
             wipe-workspace: false

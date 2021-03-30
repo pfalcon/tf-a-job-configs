@@ -21,6 +21,7 @@
             branches:
                 - ${TF_GERRIT_BRANCH}
             basedir: trusted-firmware-a
+            choosing-strategy: gerrit
             skip-tag: true
             shallow-clone: false
             wipe-workspace: false
@@ -34,6 +35,7 @@
             branches:
                 - ${TFTF_GERRIT_BRANCH}
             basedir: tf-a-tests
+            choosing-strategy: gerrit
             skip-tag: true
             shallow-clone: false
             wipe-workspace: false
