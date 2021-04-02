@@ -17,10 +17,11 @@ depends on the message namespace 'ns', the corresponding message will go into se
 --------------------------------------------------------
 all                                     lava.log
 lvl='target'                            lava-uart0.log
-lvl='feedback' and no 'ns'              feedback.log
 lvl='feedback', ns='terminal_1'         lava-uart1.log
 lvl='feedback', ns='terminal_2'         lava-uart2.log
 lvl='feedback', ns='terminal_3'         lava-uart3.log
+anything else in lvl='feedback'         feedback.log
+messages
 --------------------------------------------------------
 """
 
@@ -60,6 +61,8 @@ if __name__ == "__main__":
                     log_file_id = level
                     if "ns" in line:
                         log_file_id = "{}-{}".format(log_file_id, line["ns"])
+                        if log_file_id not in separated_log_file:
+                            log_file_id = "feedback"
                     if log_file_id not in opened_logfile:
                         des_log_file = "{}/{}".format(des_dir, separated_log_file[log_file_id])
                         opened_logfile[log_file_id] = open(des_log_file, "w")
