@@ -8,22 +8,12 @@
               - job-extended-read
               - job-build
               - job-cancel
-            joannafarley-arm:
-              - job-read
-              - job-extended-read
-              - job-build
-              - job-cancel
             lsandov1:
               - job-read
               - job-extended-read
               - job-build
               - job-cancel
-            sandrine-bailleux-arm:
-              - job-read
-              - job-extended-read
-              - job-build
-              - job-cancel
-            zelalem-aweke:
+            trusted-firmware-ci*trusted-firmware-A-OpenCI-Users:
               - job-read
               - job-extended-read
               - job-build
