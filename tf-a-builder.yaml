@@ -179,8 +179,24 @@
                           build-steps:
                             - inject:
                                 properties-file: ${WORKSPACE}/lava.param
-                            - shell:
-                                !include-raw: tf-a-builder/squad.sh
+                            - shell: |
+                                #!/bin/bash
+
+                                squad='tf-a-job-configs/tf-a-builder/squad.sh'
+                                if ! $squad; then
+                                    # Juno jobs may fail due to LAVA lab infrastructure issues (see
+                                    # https://projects.linaro.org/browse/LSS-2128) so we need to
+                                    # resubmit it if first job failed
+                                    if grep -q 'device_type: juno' artefacts/debug/job.yaml; then
+                                        if ! $squad; then
+                                            echo "LAVA JOB RESULT: 1"
+                                        fi
+                                    else
+                                        echo "LAVA JOB RESULT: 1"
+                                    fi
+                                else
+                                    echo "LAVA JOB RESULT: 0"
+                                fi
         - conditional-publisher:
           - condition-kind: file-exists
             on-evaluation-failure: dont-run
