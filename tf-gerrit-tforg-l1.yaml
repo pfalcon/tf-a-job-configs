@@ -56,6 +56,16 @@
         TF_GERRIT_REFSPEC=${GERRIT_REFSPEC}
         EOF
     - multijob:
+        name: Lint commit messages
+        condition: COMPLETED
+        projects:
+        - name: tf-a-commitlint
+          kill-phase-on: NEVER
+          predefined-parameters: |
+            REFSPEC=${GERRIT_REFSPEC}
+            REFNAME=${GERRIT_BRANCH}
+            REFNAME_BASE=origin/integration
+    - multijob:
         condition: COMPLETED
         name: Build and static checks
         projects:
