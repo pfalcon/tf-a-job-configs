@@ -2,6 +2,7 @@
     name: TF-A
     view-type: list
     job-name:
+     - tf-a-commitlint
      - tf-daily
      - tf-main
      - tf-coverity
