@@ -63,8 +63,8 @@
           kill-phase-on: NEVER
           predefined-parameters: |
             REFSPEC=${GERRIT_REFSPEC}
-            REFNAME=${GERRIT_BRANCH}
-            REFNAME_BASE=origin/integration
+            REFNAME=${GERRIT_PATCHSET_REVISION}
+            REFNAME_BASE=origin/${GERRIT_BRANCH}
     - multijob:
         condition: COMPLETED
         name: Build and static checks
