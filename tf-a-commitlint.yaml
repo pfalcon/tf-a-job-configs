@@ -5,3 +5,8 @@
     project-type: pipeline
     sandbox: true
     dsl: !include-raw: tf-a-commitlint/Jenkinsfile
+
+    properties:
+      - authorization: !include: authorization.yaml.inc
+      - build-discarder:
+          days-to-keep: 14
