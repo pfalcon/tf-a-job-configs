@@ -35,10 +35,6 @@ pipeline {
                         refspec: params.REFSPEC]]])
 
                 script {
-                    author = sh(
-                        returnStdout: true,
-                        script: 'git log --format="%ae" -1').trim()
-
                     mergeBase = sh(
                         returnStdout: true,
                         script: "git merge-base ${params.REFNAME_BASE} HEAD").trim()
@@ -47,12 +43,6 @@ pipeline {
         }
 
         stage('Lint') {
-            when {
-                expression {
-                    author.endsWith('@arm.com')
-                }
-            }
-
             steps {
                 sh "BASH_ENV=$NVM_DIR/nvm.sh bash -c 'npm install --no-save commitlint'"
                 sh "BASH_ENV=$NVM_DIR/nvm.sh bash -c 'npx commitlint --from=${mergeBase}'"
