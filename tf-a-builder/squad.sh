@@ -82,7 +82,7 @@ if [ -n "${QA_SERVER_VERSION}" ]; then
                 LAVAJOB_ID=''
                 break
             fi
-            sleep 2
+            sleep 30
             LAVAJOB_ID=$(curl --retry 4 ${QA_SERVER}/api/testjobs/${TESTJOB_ID}/?fields=job_id)
 
             # Get the job_id value (whatever it is)
