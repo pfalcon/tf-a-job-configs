@@ -117,6 +117,9 @@
             name: QA_SERVER_PROJECT
             default: 'tf-a'
         - string:
+            name: QA_SERVER_VERSION
+            default: ${BUILD_NUMBER}
+        - string:
             name: QA_SERVER
             default: 'https://qa-reports.linaro.org'
     scm:
