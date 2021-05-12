@@ -49,7 +49,20 @@ if __name__ == "__main__":
         raise SystemExit("The file '{}' is not exist!!".format(plain_log))
 
     with open(plain_log, "r") as job_log:
-        log_list = yaml.load(job_log, Loader=yaml.SafeLoader)
+        try:
+            log_list = yaml.load(job_log, Loader=yaml.SafeLoader)
+        except yaml.YAMLError as exc:
+            print ("Error while parsing YAML file:")
+            if hasattr(exc, 'problem_mark'):
+                if exc.context != None:
+                    print ('  parser says\n' + str(exc.problem_mark) + '\n  ' +
+                        str(exc.problem) + ' ' + str(exc.context))
+                else:
+                    print ('  parser says\n' + str(exc.problem_mark) + '\n  ' +
+                        str(exc.problem))
+            else:
+                print ("Something went wrong while parsing yaml file")
+            sys.exit(1)
         try:
             full_test_log = "{}/{}".format(des_dir, separated_log_file["all"])
             opened_logfile["all"] = open(full_test_log, "w")

@@ -203,6 +203,16 @@
         - conditional-publisher:
           - condition-kind: file-exists
             on-evaluation-failure: dont-run
+            condition-filename: lava-raw-debug.log
+            condition-basedir: workspace
+            action:
+                - archive:
+                    artifacts: lava-raw-debug.log
+                    latest-only: false
+                    allow-empty: true
+        - conditional-publisher:
+          - condition-kind: file-exists
+            on-evaluation-failure: dont-run
             condition-filename: lava.log
             condition-basedir: workspace
             action:

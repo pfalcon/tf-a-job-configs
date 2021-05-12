@@ -99,7 +99,7 @@ if [ -n "${QA_SERVER_VERSION}" ]; then
 
             resilient_cmd lavacli identities add --username ${LAVA_USER} --token ${LAVA_TOKEN} --uri "https://${LAVA_SERVER}/RPC2" default
 
-	    wait_status="$(wait_lava_job ${LAVAJOB_ID})"
+            wait_status="$(wait_lava_job ${LAVAJOB_ID})"
 
             # if timeout on waiting for LAVA to complete, create an 'artificial' lava.log indicating
             # job ID and timeout seconds
@@ -112,6 +112,8 @@ if [ -n "${QA_SERVER_VERSION}" ]; then
 
                 # Split the UART messages to the corresponding log files
                 ${WORKSPACE}/tf-a-job-configs/tf-a-builder/log-splitter.py "${WORKSPACE}/lava-raw.log"
+                # If there is something wrong with the log file, publish the raw log for investigation
+                [ $? -ne 0 ] && mv "${WORKSPACE}/lava-raw.log" "${WORKSPACE}/lava-raw-debug.log" && exit 1
 
                 # Fetch and store LAVA job result (1 failure, 0 success)
                 resilient_cmd lavacli jobs show ${LAVAJOB_ID} | tee "${WORKSPACE}/lava.show"
