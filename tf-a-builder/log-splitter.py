@@ -8,6 +8,7 @@
 import os
 import sys
 import yaml
+from shutil import copyfile
 
 """
 The whole messages will go into 'lava.log' and if there are 'feedback' level message,
@@ -62,6 +63,8 @@ if __name__ == "__main__":
                         str(exc.problem))
             else:
                 print ("Something went wrong while parsing yaml file")
+            # Preserve plain_log for debugging
+            copyfile(plain_log, des_dir+"/lava-raw-debug.log")
             sys.exit(1)
         try:
             full_test_log = "{}/{}".format(des_dir, separated_log_file["all"])

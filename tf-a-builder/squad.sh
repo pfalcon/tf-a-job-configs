@@ -112,8 +112,6 @@ if [ -n "${QA_SERVER_VERSION}" ]; then
 
                 # Split the UART messages to the corresponding log files
                 ${WORKSPACE}/tf-a-job-configs/tf-a-builder/log-splitter.py "${WORKSPACE}/lava-raw.log"
-                # If there is something wrong with the log file, publish the raw log for investigation
-                [ $? -ne 0 ] && mv "${WORKSPACE}/lava-raw.log" "${WORKSPACE}/lava-raw-debug.log" && exit 1
 
                 # Fetch and store LAVA job result (1 failure, 0 success)
                 resilient_cmd lavacli jobs show ${LAVAJOB_ID} | tee "${WORKSPACE}/lava.show"
