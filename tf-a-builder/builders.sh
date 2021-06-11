@@ -114,6 +114,12 @@ ln -s \
    ${TOOLS_DIR}/bin \
    /arm/pdsw/downloads/scp-models/tools/gcc-arm-none-eabi-9-2020-q2-update/bin
 
+# /arm/pdsw/downloads/scp-models/tools/gcc-arm-none-eabi-10-2020-q4-major/bin/arm-none-eabi-gcc
+mkdir -p /arm/pdsw/downloads/scp-models/tools/gcc-arm-none-eabi-10-2020-q4-major
+ln -s \
+   ${TOOLS_DIR}/gnu-rm/bin \
+   /arm/pdsw/downloads/scp-models/tools/gcc-arm-none-eabi-10-2020-q4-major/bin
+
 # /arm/projectscratch/ssg/trusted-fw/dummy-crypto-lib
 mkdir -p /arm/projectscratch/ssg/trusted-fw
 ln -s \
