@@ -113,6 +113,23 @@ if [ -n "${QA_SERVER_VERSION}" ]; then
                 # Split the UART messages to the corresponding log files
                 ${WORKSPACE}/tf-a-job-configs/tf-a-builder/log-splitter.py "${WORKSPACE}/lava-raw.log"
 
+                # Take possible code coverage trace data from the LAVA log
+                ${WORKSPACE}/tf-a-job-configs/tf-a-builder/feedback-trace-splitter.sh \
+                            ${WORKSPACE}/trusted-firmware-a \
+                            ${WORKSPACE} \
+                            ${WORKSPACE}/artefacts/debug/ \
+                            ${TF_GERRIT_REFSPEC}
+
+                # Generate Code Coverate Report in case there are traces available
+                if find covtrace-*.log; then
+                    cd ${WORKSPACE}/qa-tools/coverage-tool/coverage-reporting
+                    ./branch_coverage.sh \
+                                --config ${WORKSPACE}/config_file.json \
+                                --workspace ${WORKSPACE}/trusted-firmware-a \
+                                --outdir ${WORKSPACE}/trace_report
+                    find ${WORKSPACE}/trace_report
+                fi
+
                 # Fetch and store LAVA job result (1 failure, 0 success)
                 resilient_cmd lavacli jobs show ${LAVAJOB_ID} | tee "${WORKSPACE}/lava.show"
                 if grep 'state.*: Finished' "${WORKSPACE}/lava.show"; then
