@@ -141,7 +141,6 @@
         - tf-a-job-configs
         - trusted-firmware-a
         - tf-a-tests
-        - qa-tools
     wrappers:
         - timestamps
         - timeout:
