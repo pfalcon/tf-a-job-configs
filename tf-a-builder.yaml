@@ -52,20 +52,6 @@
             skip-tag: true
             shallow-clone: false
             wipe-workspace: false
-- scm:
-    name: qa-tools
-    scm:
-        - git:
-            url: https://git.gitlab.arm.com/tooling/qa-tools.git
-            refspec: master
-            name: origin
-            branches:
-                - master
-            basedir: qa-tools
-            choosing-strategy: gerrit
-            skip-tag: true
-            shallow-clone: true
-            wipe-workspace: false
 - job:
     name: tf-a-builder
     node: docker-amd64-tf-a-bionic
@@ -136,6 +122,9 @@
         - string:
             name: QA_SERVER
             default: 'https://qa-reports.linaro.org'
+        - string:
+            name: QA_TOOLS_REPO
+            default: 'https://git.gitlab.arm.com/tooling/qa-tools.git'
     scm:
         - tf-a-ci-scripts
         - tf-a-job-configs

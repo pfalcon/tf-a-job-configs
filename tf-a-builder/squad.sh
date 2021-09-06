@@ -122,6 +122,7 @@ if [ -n "${QA_SERVER_VERSION}" ]; then
 
                 # Generate Code Coverate Report in case there are traces available
                 if find covtrace-*.log; then
+                    git clone ${QA_TOOLS_REPO} qa-tools
                     cd ${WORKSPACE}/qa-tools/coverage-tool/coverage-reporting
                     ./branch_coverage.sh \
                                 --config ${WORKSPACE}/config_file.json \
