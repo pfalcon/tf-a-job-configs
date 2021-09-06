@@ -220,7 +220,7 @@
             condition-basedir: workspace
             action:
                 - archive:
-                    artifacts: lava.log, lava-uart?.log
+                    artifacts: lava.log, lava-uart?.log, feedback.log, config_file.json, covtrace-*.log, trace_report/**
                     latest-only: false
                     allow-empty: true
         - groovy-postbuild:
