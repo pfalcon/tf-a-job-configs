@@ -1,16 +1,3 @@
-- scm:
-    name: tf-a-ci-scripts
-    scm:
-        - git:
-            url: https://git.trustedfirmware.org/ci/tf-a-ci-scripts.git
-            refspec: +refs/heads/master:refs/remotes/origin/master
-            name: origin
-            branches:
-                - refs/heads/master
-            basedir: tf-a-ci-scripts
-            skip-tag: true
-            shallow-clone: true
-            wipe-workspace: false
 - job:
     name: tf-ci-gateway
     node: docker-amd64-tf-a-bionic
@@ -53,9 +40,13 @@
     - bool:
         name: ENABLE_STATIC_CHECK
         default: false
-    scm:
-        - tf-a-ci-scripts
+    - string:
+            name: SHARE_FOLDER
+            default: '/srv/shared/${JOB_NAME}/${BUILD_NUMBER}'
+            description: 'Folder containing shared repositories for downstream pipeline jobs'
     builders:
+    - shell:
+        !include-raw: scripts/clone.sh
     - shell: |
         #!/bin/bash
         set -e
@@ -63,10 +54,14 @@
         export workspace=$PWD
         export test_groups=$TEST_GROUPS
         $CI_ROOT/script/gen_test_desc.py
+        cat << EOF > share.param
+        SHARE_FOLDER=${SHARE_FOLDER}
+        EOF
     - trigger-builds:
       - project:
         - tf-a-builder
         block: true
+        property-file: share.param
         current-parameters: true
         property-file-fail-on-missing: false
         parameter-factories:

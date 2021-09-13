@@ -1,6 +1,6 @@
 - job:
     name: tf-daily
-    node: master
+    node: docker-amd64-tf-a-bionic
     project-type: freestyle
     concurrent: false
     disabled: false
@@ -30,9 +30,21 @@
         - string:
             name: TFTF_GERRIT_REFSPEC
             default: '+refs/heads/master:refs/remotes/origin/master'
+        - string:
+            name: SHARE_FOLDER
+            default: '/srv/shared/${JOB_NAME}/${BUILD_NUMBER}'
+            description: 'Folder containing shared repositories for downstream pipeline jobs'
     wrappers:
         - timestamps
     builders:
+        - shell:
+            !include-raw: scripts/clone.sh
+        - shell: |
+            #!/bin/bash
+            set -e
+            cat << EOF > share.param
+            SHARE_FOLDER=${SHARE_FOLDER}
+            EOF
         - trigger-builds:
             - project:
                 - tf-main

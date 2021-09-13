@@ -1,44 +1,3 @@
-- scm:
-    name: tf-a-ci-scripts
-    scm:
-        - git:
-            url: https://git.trustedfirmware.org/ci/tf-a-ci-scripts.git
-            refspec: +refs/heads/master:refs/remotes/origin/master
-            name: origin
-            branches:
-                - refs/heads/master
-            basedir: tf-a-ci-scripts
-            skip-tag: true
-            shallow-clone: true
-            wipe-workspace: false
-- scm:
-    name: trusted-firmware-a
-    scm:
-        - git:
-            url: https://review.trustedfirmware.org/${TF_GERRIT_PROJECT}
-            refspec: ${TF_GERRIT_REFSPEC}
-            name: origin
-            branches:
-                - ${TF_GERRIT_BRANCH}
-            basedir: trusted-firmware-a
-            choosing-strategy: gerrit
-            skip-tag: true
-            shallow-clone: false
-            wipe-workspace: false
-- scm:
-    name: tf-a-tests
-    scm:
-       - git:
-            url: https://review.trustedfirmware.org/${TFTF_GERRIT_PROJECT}
-            refspec: ${TFTF_GERRIT_REFSPEC}
-            name: origin
-            branches:
-                - ${TFTF_GERRIT_BRANCH}
-            basedir: tf-a-tests
-            choosing-strategy: gerrit
-            skip-tag: true
-            shallow-clone: false
-            wipe-workspace: false
 - job:
     name: tf-static-checks
     node: docker-amd64-tf-a-bionic
@@ -79,16 +38,18 @@
             default: trusted-firmware-a
             description: |-
                 Repository to run static checks on.
-    scm:
-        - tf-a-ci-scripts
-        - trusted-firmware-a
-        - tf-a-tests
+        - string:
+            name: SHARE_FOLDER
+            default: '/srv/shared/${JOB_NAME}/${BUILD_NUMBER}'
+            description: 'Folder containing shared repositories for downstream pipeline jobs'
     wrappers:
         - timestamps
         - timeout:
             timeout: 180
             fail: true
     builders:
+    - shell:
+        !include-raw: scripts/clone.sh
     - shell: |
        #!/bin/bash
        set -e

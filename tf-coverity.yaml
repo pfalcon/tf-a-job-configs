@@ -1,30 +1,3 @@
-- scm:
-    name: tf-a-ci-scripts
-    scm:
-        - git:
-            url: https://git.trustedfirmware.org/ci/tf-a-ci-scripts.git
-            refspec: +refs/heads/master:refs/remotes/origin/master
-            name: origin
-            branches:
-                - refs/heads/master
-            basedir: tf-a-ci-scripts
-            skip-tag: true
-            shallow-clone: true
-            wipe-workspace: false
-- scm:
-    name: trusted-firmware-a
-    scm:
-        - git:
-            url: https://review.trustedfirmware.org/${TF_GERRIT_PROJECT}
-            refspec: ${TF_GERRIT_REFSPEC}
-            name: origin
-            branches:
-                - ${TF_GERRIT_BRANCH}
-            basedir: trusted-firmware-a
-            choosing-strategy: gerrit
-            skip-tag: true
-            shallow-clone: false
-            wipe-workspace: false
 - job:
     name: tf-coverity
     node: docker-amd64-tf-a-bionic
@@ -58,9 +31,10 @@
         - bool:
             name: UPLOAD_TO_COVERITY_SCAN_ONLINE
             default: false
-    scm:
-        - tf-a-ci-scripts
-        - trusted-firmware-a
+        - string:
+            name: SHARE_FOLDER
+            default: '/srv/shared/${JOB_NAME}/${BUILD_NUMBER}'
+            description: 'Folder containing shared repositories for downstream pipeline jobs'
     wrappers:
         - timestamps
         - credentials-binding:
@@ -68,6 +42,8 @@
               credential-id: TF-COVERITY-SCAN-TOKEN
               variable: TF_COVERITY_SCAN_TOKEN
     builders:
+        - shell:
+            !include-raw: scripts/clone.sh
         - shell: |
             #!/bin/bash
             set -e

@@ -1,6 +1,6 @@
 - job:
     name: tf-tftf-gerrit-tforg-l2
-    node: master
+    node: docker-amd64-tf-a-bionic
     project-type: multijob
     concurrent: true
     disabled: false
@@ -32,6 +32,14 @@
         - string:
             name: GERRIT_CHANGE_NUMBER
             default: ''
+        - string:
+            name: TFTF_GERRIT_REFSPEC
+            default: ${GERRIT_REFSPEC}
+            description: 'Parameter only used by the clone script'
+        - string:
+            name: SHARE_FOLDER
+            default: '/srv/shared/${JOB_NAME}/${BUILD_NUMBER}'
+            description: 'Folder containing shared repositories for downstream pipeline jobs'
     wrappers:
       - credentials-binding:
           - ssh-user-private-key:
@@ -42,6 +50,8 @@
       - workspace-cleanup
       - timestamps
     builders:
+    - shell:
+        !include-raw: scripts/clone.sh
     - shell: |
         #!/bin/bash
         set -e
@@ -54,6 +64,7 @@
         TFTF_GERRIT_PROJECT=${GERRIT_PROJECT}
         TFTF_GERRIT_BRANCH=${GERRIT_BRANCH}
         TFTF_GERRIT_REFSPEC=${GERRIT_REFSPEC}
+        SHARE_FOLDER=${SHARE_FOLDER}
         EOF
     - multijob:
         condition: COMPLETED

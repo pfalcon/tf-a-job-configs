@@ -1,33 +1,6 @@
-- scm:
-    name: tf-a-ci-scripts
-    scm:
-        - git:
-            url: https://git.trustedfirmware.org/ci/tf-a-ci-scripts.git
-            refspec: +refs/heads/master:refs/remotes/origin/master
-            name: origin
-            branches:
-                - refs/heads/master
-            basedir: tf-a-ci-scripts
-            skip-tag: true
-            shallow-clone: true
-            wipe-workspace: false
-- scm:
-    name: trusted-firmware-a
-    scm:
-        - git:
-            url: https://review.trustedfirmware.org/${TF_GERRIT_PROJECT}
-            refspec: ${TF_GERRIT_REFSPEC}
-            name: origin
-            branches:
-                - ${TF_GERRIT_BRANCH}
-            basedir: trusted-firmware-a
-            choosing-strategy: gerrit
-            skip-tag: true
-            shallow-clone: false
-            wipe-workspace: false
 - job:
     name: tf-main
-    node: master
+    node: docker-amd64-tf-a-bionic
     project-type: multijob
     concurrent: true
     disabled: false
@@ -61,9 +34,10 @@
         - string:
             name: TFTF_GERRIT_REFSPEC
             default: '+refs/heads/master:refs/remotes/origin/master'
-    scm:
-        - tf-a-ci-scripts
-        - trusted-firmware-a
+        - string:
+            name: SHARE_FOLDER
+            default: '/srv/shared/${JOB_NAME}/${BUILD_NUMBER}'
+            description: 'Folder containing shared repositories for downstream pipeline jobs'
     wrappers:
       - credentials-binding:
           - ssh-user-private-key:
@@ -74,6 +48,8 @@
       - workspace-cleanup
       - timestamps
     builders:
+    - shell:
+        !include-raw: scripts/clone.sh
     - shell: |
         #!/bin/bash
         set -e
@@ -83,6 +59,7 @@
         GERRIT_REFSPEC=${TF_GERRIT_REFSPEC}
         QA_SERVER_PROJECT=${JOB_NAME}
         QA_SERVER_VERSION=${BUILD_NUMBER}
+        SHARE_FOLDER=${SHARE_FOLDER}
         EOF
         cat << EOF > tf-a-tests-env.param
         GERRIT_PROJECT=${TFTF_GERRIT_PROJECT}
@@ -90,6 +67,7 @@
         GERRIT_REFSPEC=${TFTF_GERRIT_REFSPEC}
         QA_SERVER_PROJECT=${JOB_NAME}
         QA_SERVER_VERSION=${BUILD_NUMBER}
+        SHARE_FOLDER=${SHARE_FOLDER}
         EOF
     - multijob:
         name: Run static checks on the code
