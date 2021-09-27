@@ -31,7 +31,7 @@ set -e
 REFSPEC_MASTER="refs/heads/master"
 GIT_REPO="https://git.trustedfirmware.org"
 GERRIT_HOST="https://review.trustedfirmware.org"
-GIT_CLONE_PARAMS="--depth=1 --no-checkout --no-tags"
+GIT_CLONE_PARAMS=""
 
 # Defaults Projects
 TF_GERRIT_PROJECT="${GERRIT_HOST}/${TF_GERRIT_PROJECT:-TF-A/trusted-firmware-a}"
