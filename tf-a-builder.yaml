@@ -136,16 +136,21 @@
                                 #!/bin/bash
 
                                 squad='tf-a-job-configs/tf-a-builder/squad.sh'
+                                # FIXME: Juno and FVP jobs may fail due to non-related users changes,
+                                # so CI needs to resubmit the job, at most three times:
+                                # Juno jobs may fail due to LAVA lab infrastructure issues (see
+                                # https://projects.linaro.org/browse/LSS-2128)
+                                # FVP jobs may hang at some particular TFTF test (see
+                                # https://linaro.atlassian.net/browse/TFC-176)
                                 if ! $squad; then
-                                    # Juno jobs may fail due to LAVA lab infrastructure issues (see
-                                    # https://projects.linaro.org/browse/LSS-2128) so we need to
-                                    # resubmit it if first job failed
-                                    if grep -q 'device_type: juno' artefacts/debug/job.yaml; then
+                                    if ! $squad; then
                                         if ! $squad; then
                                             echo "LAVA JOB RESULT: 1"
+                                        else
+                                            echo "LAVA JOB RESULT: 0"
                                         fi
                                     else
-                                        echo "LAVA JOB RESULT: 1"
+                                        echo "LAVA JOB RESULT: 0"
                                     fi
                                 else
                                     echo "LAVA JOB RESULT: 0"
