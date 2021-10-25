@@ -30,6 +30,9 @@
         - string:
             name: TFTF_GERRIT_REFSPEC
             default: '+refs/heads/master:refs/remotes/origin/master'
+        - string:
+            name: CI_REFSPEC
+            default: '+refs/heads/master:refs/remotes/origin/master'
         - choice:
             name: REPO_UNDER_TEST
             choices:

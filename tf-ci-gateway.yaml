@@ -37,6 +37,21 @@
           White space separated list of test configs: can be mix of specific
           test configs (e.g., <code>l1/fvp-default:fvp-linux-default</code>) and
           group names (e.g., <code>l1 l2</code>).
+    - string:
+        name: TF_GERRIT_REFSPEC
+        default: '+refs/heads/master:refs/remotes/origin/master'
+        description: |
+          trusted-firmware-a refspec to use. The master branch is used by default.
+    - string:
+        name: TFTF_GERRIT_REFSPEC
+        default: '+refs/heads/master:refs/remotes/origin/master'
+        description: |
+          tf-a-tests refspec to use. The master branch is used by default.
+    - string:
+        name: CI_REFSPEC
+        default: '+refs/heads/master:refs/remotes/origin/master'
+        description: |
+          tf-a-ci-scripts refspec to use. The master branch is used by default.
     - bool:
         name: ENABLE_STATIC_CHECK
         default: false

@@ -26,6 +26,9 @@
             name: TF_GERRIT_REFSPEC
             default: '+refs/heads/integration:refs/remotes/origin/integration'
         - string:
+            name: CI_REFSPEC
+            default: '+refs/heads/master:refs/remotes/origin/master'
+        - string:
             name: COVERITY_VERSION
             default: '2020.09'
         - bool:

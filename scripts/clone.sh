@@ -36,18 +36,18 @@ GIT_CLONE_PARAMS=""
 # Defaults Projects
 TF_GERRIT_PROJECT="${GERRIT_HOST}/${TF_GERRIT_PROJECT:-TF-A/trusted-firmware-a}"
 TFTF_GERRIT_PROJECT="${GERRIT_HOST}/${TFTF_GERRIT_PROJECT:-/TF-A/tf-a-tests}"
-SCRIPTS_PROJECT="${SCRIPTS_PROJECT:-${GIT_REPO}/ci/tf-a-ci-scripts.git}"
+CI_PROJECT="${CI_PROJECT:-${GIT_REPO}/ci/tf-a-ci-scripts.git}"
 JOBS_PROJECT="${JOB_PROJECT:-${GIT_REPO}/ci/tf-a-job-configs.git}"
 
 # Default Reference specs
 TF_GERRIT_REFSPEC="${TF_GERRIT_REFSPEC:-${REFSPEC_MASTER}}"
 TFTF_GERRIT_REFSPEC="${TFTF_GERRIT_REFSPEC:-${REFSPEC_MASTER}}"
-SCRIPTS_REFSPEC="${SCRIPTS_REFSPEC:-${REFSPEC_MASTER}}"
+CI_REFSPEC="${CI_REFSPEC:-${REFSPEC_MASTER}}"
 JOBS_REFSPEC="${JOBS_REFSPEC:-${REFSPEC_MASTER}}"
 
 # Array containing "<repo url>;"<repo name>;<refspec>" elements
 repos=(
-    "${SCRIPTS_PROJECT};tf-a-ci-scripts;${SCRIPTS_REFSPEC}"
+    "${CI_PROJECT};tf-a-ci-scripts;${CI_REFSPEC}"
     "${JOBS_PROJECT};tf-a-job-configs;${JOBS_REFSPEC}"
     "${TF_GERRIT_PROJECT};trusted-firmware-a;${TF_GERRIT_REFSPEC}"
     "${TFTF_GERRIT_PROJECT};tf-a-tests;${TFTF_GERRIT_REFSPEC}"
