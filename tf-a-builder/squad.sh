@@ -54,8 +54,6 @@ if [ -n "${QA_SERVER_VERSION}" ]; then
             --retry 4 \
             -X POST \
             --header "Auth-Token: ${QA_REPORTS_TOKEN}" \
-            -d patch_source=${GERRIT_HOST} \
-            -d patch_id=${GERRIT_CHANGE_NUMBER},${GERRIT_PATCHSET_NUMBER} \
             ${QA_SERVER}/api/createbuild/${QA_SERVER_TEAM}/${QA_SERVER_PROJECT}/${QA_SERVER_VERSION}
     fi
 
