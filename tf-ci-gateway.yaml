@@ -48,6 +48,11 @@
         description: |
           tf-a-tests refspec to use. The master branch is used by default.
     - string:
+       name: SPM_REFSPEC
+       default: '+refs/heads/master:refs/remotes/origin/master'
+       description: |
+         SPM(Hafnium) refspec to use. The master branch is used by default.
+    - string:
         name: CI_REFSPEC
         default: '+refs/heads/master:refs/remotes/origin/master'
         description: |
