@@ -163,7 +163,7 @@ rhs="$(echo "$test_desc" | awk -F: '{print $2}')"
 test_group="$(echo "$lhs" | awk -F% '{print $2}')"
 build_config="$(echo "$lhs" | awk -F% '{print $3}')"
 run_config="${rhs%.test}"
-test_config="$(cat $WORKSPACE/TEST_DESC)"
+test_config="${TEST_CONFIG}"
 
 export BUILD_CONFIG="$build_config"
 export RUN_CONFIG="$run_config"

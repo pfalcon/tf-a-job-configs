@@ -16,7 +16,13 @@
         - string:
             name: import_cc
         - string:
+            name: TEST_CONFIG
+            description: |
+              Original test configuration.
+        - string:
             name: TEST_DESC
+            description: |
+              Expanded and normalized test configuration, aka "test description"
         - string:
             name: TF_GERRIT_PROJECT
             default: 'TF-A/trusted-firmware-a'

@@ -85,9 +85,8 @@
         current-parameters: true
         property-file-fail-on-missing: false
         parameter-factories:
-        - factory: binaryfile
-          parameter-name: TEST_DESC
-          file-pattern: '*.test'
+        - factory: filebuild
+          file-pattern: '*.testprop'
           no-files-found-action: FAIL
     publishers:
         - postbuildscript:
