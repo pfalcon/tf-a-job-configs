@@ -1,11 +1,11 @@
 - job:
-    name: tf-tftf-gerrit-tforg-l1
+    name: tf-a-tftf-gerrit-tforg-l2
     node: docker-amd64-tf-a-bionic
     project-type: multijob
     concurrent: true
     disabled: false
     description: |
-      Job that triggers for every TF-A-Tests patch approved with the Allow-CI+1
+      Job that triggers for every TF-A-Tests patch approved with the Allow-CI+2
       label on review.trustedfirmware.org.
     properties:
     - throttle:
@@ -68,50 +68,56 @@
         EOF
     - multijob:
         condition: COMPLETED
-        name: Build and static checks
+        name: Carry out level 1 tests
         projects:
         - kill-phase-on: NEVER
-          name: tf-static-checks
+          name: tf-a-tftf-gerrit-tforg-l1
+          current-parameters: true
+          property-file: env.param
+    - multijob:
+        condition: COMPLETED
+        name: Run Firmware Update Tests
+        projects:
+        - kill-phase-on: NEVER
+          name: tf-a-ci-gateway
           predefined-parameters: |-
-            REPO_UNDER_TEST=tf-a-tests
+            TEST_GROUPS=tftf-l2-fwu
+            TFTF_REFSPEC=$GERRIT_REFSPEC
           property-file: env.param
     - multijob:
         condition: COMPLETED
-        name: Run doc build check
+        name: Run Level 2 testing of TF-A-Tests
         projects:
         - kill-phase-on: NEVER
-          name: tf-ci-gateway
-          predefined-parameters: |
-            TEST_GROUPS=tftf-l1-check-docs
+          name: tf-a-ci-gateway
+          predefined-parameters: |-
+            TEST_GROUPS=tftf-l2-fvp-auxiliary tftf-l2-juno tf-l2-boot-tests-spm-mm tftf-l2-fvp-dynamiq spm-l2-boot-tests
+            TFTF_REFSPEC=$GERRIT_REFSPEC
           property-file: env.param
     - multijob:
         condition: COMPLETED
-        name: Build TF-A-Tests
+        name: Run extensive TF-A-Tests
         projects:
         - kill-phase-on: NEVER
-          name: tf-ci-gateway
-          predefined-parameters: |
-            TEST_GROUPS=tftf-l1-build
-          property-file: env.param
-    - multijob:
-        condition: COMPLETED
-        name: Basic TF-A-Tests test cases
-        projects:
-        - kill-phase-on: NEVER
-          name: tf-ci-gateway
-          predefined-parameters: |
-            TEST_GROUPS=tftf-l1-fvp tftf-l1-juno
+          name: tf-a-ci-gateway
+          predefined-parameters: |-
+            TEST_GROUPS=tftf-l2-extensive-tests-fvp
+            TFTF_REFSPEC=$GERRIT_REFSPEC
           property-file: env.param
     triggers:
     - gerrit:
         server-name: review.trustedfirmware.org
+        projects:
+        - branches:
+          - branch-compare-type: PLAIN
+            branch-pattern: master
+          project-compare-type: PLAIN
+          project-pattern: TF-A/tf-a-tests
         trigger-on:
           - comment-added-event:
               approval-category: "Allow-CI"
-              approval-value: 1
-        projects:
-          - project-compare-type: PLAIN
-            project-pattern: TF-A/tf-a-tests
-            branches:
-            - branch-compare-type: PLAIN
-              branch-pattern: master
+              approval-value: 2
+        override-votes: true
+        gerrit-build-successful-verified-value: 1
+        gerrit-build-failed-verified-value: -1
+        gerrit-build-unstable-verified-value: -1

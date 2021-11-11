@@ -1,11 +1,11 @@
 - job:
-    name: tf-gerrit-tforg-l1
+    name: tf-a-tftf-gerrit-tforg-l1
     node: docker-amd64-tf-a-bionic
     project-type: multijob
     concurrent: true
     disabled: false
     description: |
-      Job that triggers for every TF-A patch approved with the Allow-CI+1
+      Job that triggers for every TF-A-Tests patch approved with the Allow-CI+1
       label on review.trustedfirmware.org.
     properties:
     - throttle:
@@ -19,13 +19,13 @@
     parameters:
         - string:
             name: GERRIT_PROJECT
-            default: 'TF-A/trusted-firmware-a'
+            default: 'TF-A/tf-a-tests'
         - string:
             name: GERRIT_BRANCH
-            default: 'refs/heads/integration'
+            default: 'refs/heads/master'
         - string:
             name: GERRIT_REFSPEC
-            default: '+refs/heads/integration:refs/remotes/origin/integration'
+            default: '+refs/heads/master:refs/remotes/origin/master'
         - string:
             name: GERRIT_PATCHSET_NUMBER
             default: ''
@@ -33,7 +33,7 @@
             name: GERRIT_CHANGE_NUMBER
             default: ''
         - string:
-            name: TF_GERRIT_REFSPEC
+            name: TFTF_GERRIT_REFSPEC
             default: ${GERRIT_REFSPEC}
             description: 'Parameter only used by the clone script'
         - string:
@@ -61,57 +61,46 @@
         GERRIT_HOST=${GERRIT_HOST}
         QA_SERVER_PROJECT=${JOB_NAME}
         QA_SERVER_VERSION=${BUILD_NUMBER}
-        TF_GERRIT_PROJECT=${GERRIT_PROJECT}
-        TF_GERRIT_BRANCH=${GERRIT_BRANCH}
-        TF_GERRIT_REFSPEC=${GERRIT_REFSPEC}
+        TFTF_GERRIT_PROJECT=${GERRIT_PROJECT}
+        TFTF_GERRIT_BRANCH=${GERRIT_BRANCH}
+        TFTF_GERRIT_REFSPEC=${GERRIT_REFSPEC}
         SHARE_FOLDER=${SHARE_FOLDER}
         EOF
-    - multijob:
-        name: Lint commit messages
-        condition: COMPLETED
-        projects:
-        - name: tf-a-commitlint
-          kill-phase-on: NEVER
-          predefined-parameters: |
-            REFSPEC=${GERRIT_REFSPEC}
-            REFNAME=${GERRIT_PATCHSET_REVISION}
-            REFNAME_BASE=origin/${GERRIT_BRANCH}
     - multijob:
         condition: COMPLETED
         name: Build and static checks
         projects:
         - kill-phase-on: NEVER
-          name: tf-static-checks
+          name: tf-a-static-checks
           predefined-parameters: |-
-            TEST_GROUPS=tf-l2-scan-build
-            ENABLE_STATIC_CHECK=true
+            REPO_UNDER_TEST=tf-a-tests
           property-file: env.param
     - multijob:
         condition: COMPLETED
         name: Run doc build check
         projects:
         - kill-phase-on: NEVER
-          name: tf-ci-gateway
+          name: tf-a-ci-gateway
           predefined-parameters: |
-            TEST_GROUPS=tf-l1-check-docs
+            TEST_GROUPS=tftf-l1-check-docs
           property-file: env.param
     - multijob:
         condition: COMPLETED
-        name: Run build tests
+        name: Build TF-A-Tests
         projects:
         - kill-phase-on: NEVER
-          name: tf-ci-gateway
+          name: tf-a-ci-gateway
           predefined-parameters: |
-            TEST_GROUPS=tf-l1-build-fvp tf-l1-build-juno tf-l1-build-clang tf-l1-build-plat spm-l1-build-tests
+            TEST_GROUPS=tftf-l1-build
           property-file: env.param
     - multijob:
         condition: COMPLETED
-        name: Run boot tests
+        name: Basic TF-A-Tests test cases
         projects:
         - kill-phase-on: NEVER
-          name: tf-ci-gateway
+          name: tf-a-ci-gateway
           predefined-parameters: |
-            TEST_GROUPS=tf-l1-boot-tests-aarch32 tf-l1-boot-tests-bl2_el3 tf-l1-boot-tests-cortex tf-l1-boot-tests-foundation tf-l1-boot-tests-gicv2 tf-l1-boot-tests-juno tf-l1-boot-tests-misc
+            TEST_GROUPS=tftf-l1-fvp tftf-l1-juno
           property-file: env.param
     triggers:
     - gerrit:
@@ -121,19 +110,8 @@
               approval-category: "Allow-CI"
               approval-value: 1
         projects:
-        - project-compare-type: PLAIN
-          project-pattern: TF-A/trusted-firmware-a
-          branches:
+          - project-compare-type: PLAIN
+            project-pattern: TF-A/tf-a-tests
+            branches:
             - branch-compare-type: PLAIN
-              branch-pattern: integration
-        override-votes: true
-        gerrit-build-started-verified-value: 0
-        gerrit-build-successful-verified-value: 1
-        gerrit-build-failed-verified-value: -1
-        gerrit-build-unstable-verified-value: -1
-        gerrit-build-notbuilt-verified-value: 0
-        gerrit-build-started-codereview-value: 0
-        gerrit-build-successful-codereview-value: 0
-        gerrit-build-failed-codereview-value: 0
-        gerrit-build-unstable-codereview-value: 0
-        gerrit-build-notbuilt-codereview-value: 0
+              branch-pattern: master

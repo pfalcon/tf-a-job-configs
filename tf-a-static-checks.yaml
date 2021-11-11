@@ -1,5 +1,5 @@
 - job:
-    name: tf-static-checks
+    name: tf-a-static-checks
     node: docker-amd64-tf-a-bionic
     project-type: freestyle
     concurrent: true
@@ -71,10 +71,10 @@
        # line endings, coding style and banned API.
        IS_CONTINUOUS_INTEGRATION=1 ${WORKSPACE}/tf-a-ci-scripts/script/static-checks/static-checks.sh
     - trigger-builds:
-      - project: tf-ci-gateway
+      - project: tf-a-ci-gateway
         block: true
         property-file: env.param
-        # Do not trigger tf-ci-gateway if env.param file does not exist,
+        # Do not trigger tf-a-ci-gateway if env.param file does not exist,
         # which is the case here for TF-A Tests repository
         property-file-fail-on-missing: True
     publishers:
@@ -83,4 +83,4 @@
         - groovy-postbuild:
             script:
                 !include-raw:
-                  - tf-static-checks/postbuild.groovy
+                  - tf-a-static-checks/postbuild.groovy

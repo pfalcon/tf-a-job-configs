@@ -1,5 +1,5 @@
 - job:
-    name: tf-ci-gateway
+    name: tf-a-ci-gateway
     node: docker-amd64-tf-a-bionic
     project-type: freestyle
     concurrent: true
@@ -108,4 +108,4 @@
         - groovy-postbuild:
             script:
                 !include-raw:
-                  - tf-ci-gateway/postbuild.groovy
+                  - tf-a-ci-gateway/postbuild.groovy

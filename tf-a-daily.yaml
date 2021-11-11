@@ -1,5 +1,5 @@
 - job:
-    name: tf-daily
+    name: tf-a-daily
     node: docker-amd64-tf-a-bionic
     project-type: freestyle
     concurrent: false
@@ -50,8 +50,8 @@
             EOF
         - trigger-builds:
             - project:
-                - tf-main
-                - tf-coverity
+                - tf-a-main
+                - tf-a-coverity
               block: true
               current-parameters: true
     triggers:

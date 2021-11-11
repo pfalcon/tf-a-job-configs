@@ -1,5 +1,5 @@
 - job:
-    name: tf-coverity
+    name: tf-a-coverity
     node: docker-amd64-tf-a-bionic
     project-type: freestyle
     concurrent: true
@@ -91,4 +91,4 @@
         - groovy-postbuild:
             script:
                 !include-raw:
-                  - tf-coverity/postbuild.groovy
+                  - tf-a-coverity/postbuild.groovy
