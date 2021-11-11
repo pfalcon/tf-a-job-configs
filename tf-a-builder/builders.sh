@@ -72,16 +72,7 @@ export tfa_downloads="${tf_downloads}/tf-a"
 # Fetch required firmware/binaries and place it at proper location
 export nfs_volume="${WORKSPACE}/nfs"
 project_filer="${nfs_volume}/projectscratch/ssg/trusted-fw"
-for d in spm spm-10-23-2020; do
-    mkdir -p ${project_filer}/ci-files/$d
-    cd ${project_filer}/ci-files/$d
-    resilient_cmd curl --connect-timeout 5 --retry 5 --retry-delay 1 -fsSLo \
-	 download.json \
-	 ${tfa_downloads}/$d/?export=json
-    for f in $(cat download.json | jq .files[].Url | sed s/\"//g); do
-        resilient_cmd curl --connect-timeout 5 --retry 5 --retry-delay 1 -fsSLo  $(basename $f) $f
-    done
-done
+mkdir -p ${project_filer}
 
 # FIXME: place below code in above loop
 # fetch https://downloads.trustedfirmware.org/tf-a/dummy-crypto-lib.tar
