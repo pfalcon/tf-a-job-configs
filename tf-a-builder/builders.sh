@@ -43,16 +43,13 @@ cd ${WORKSPACE}
 # blocklist these.
 # 1. coverity-tf-misra: https://projects.linaro.org/browse/TFC-10
 # 2. fvp-tbb-mbedtls-upcounter,fvp-fwu:fvp-tftf.fwu-aemv8a.invalid_nvcounter-debug: Pending TFC ticket
-# 3. Failure at LAVA job https://tf.validation.linaro.org/scheduler/job/142122
-#    TFC ticket https://projects.linaro.org/browse/TFC-70
-# 4. Failure at LAVA job https://tf.validation.linaro.org/scheduler/job/142101
+# 3. Failure at LAVA job https://tf.validation.linaro.org/scheduler/job/142101
 #    TFC ticket https://projects.linaro.org/browse/TFC-70
 
 blocklist="blocklist.txt"
 cat << EOF > "${blocklist}"
 coverity-tf-misra
 fvp-tbb-mbedtls-upcounter,fvp-fwu,nil,nil,nil:fvp-tftf.fwu-aemv8a.invalid_nvcounter-debug
-fvp-mb-256-optee-romlib,nil,nil,nil,nil:fvp-optee.mb-linux.rootfs+ftpm-romlib-fip.ftpm-aemv8a
 fvp-linux-as-bl33,nil,nil,nil,nil:fvp-linux.bl33-dtb-aemv8a.linux.bl33-debug
 EOF
 
