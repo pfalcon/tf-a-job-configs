@@ -13,6 +13,11 @@
               - job-extended-read
               - job-build
               - job-cancel
+            pfalcon:
+              - job-read
+              - job-extended-read
+              - job-build
+              - job-cancel
             trusted-firmware-ci*trusted-firmware-A-OpenCI-Users:
               - job-read
               - job-extended-read
