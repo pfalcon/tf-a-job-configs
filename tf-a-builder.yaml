@@ -161,6 +161,16 @@
                                 else
                                     echo "LAVA JOB RESULT: 0"
                                 fi
+                - postbuildscript:
+                    builders:
+                        - role: SLAVE
+                          build-on:
+                              - SUCCESS
+                          build-steps:
+                            - shell: |
+                                #!/bin/bash
+                                echo "=== Starting expect-post tests ==="
+                                ./tf-a-ci-scripts/script/expect-post-runner.sh
         - conditional-publisher:
           - condition-kind: file-exists
             on-evaluation-failure: dont-run
