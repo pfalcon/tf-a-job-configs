@@ -27,6 +27,15 @@
 
 set -e
 
+# WORKAROUND START
+# Install last-minute dependencies. This should not be done like that,
+# instead all dependencies should go into the build docker image. But
+# to unbreak urgent regressions, some packages may be installed here
+# until they're moved to the docker image.
+sudo apt update
+sudo apt-get install -y python3-venv
+# WORKAROUND END
+
 # Global defaults
 REFSPEC_MASTER="refs/heads/master"
 GIT_REPO="https://git.trustedfirmware.org"
