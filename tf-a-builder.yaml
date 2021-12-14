@@ -168,7 +168,7 @@
                               - SUCCESS
                           build-steps:
                             - shell: |
-                                #!/bin/bash
+                                #!/bin/bash -e
                                 echo "=== Starting expect-post tests ==="
                                 ./tf-a-ci-scripts/script/expect-post-runner.sh
         - conditional-publisher:
