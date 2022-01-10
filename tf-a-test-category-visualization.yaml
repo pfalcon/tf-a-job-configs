@@ -1,0 +1,29 @@
+- job:
+    name: tf-a-test-category-visualization
+    description: >-
+      Generates a visualization of TFTF tests by their test group and category.
+    node: docker-amd64-tf-a-jammy
+    concurrent: true
+    properties:
+    - authorization: !include: authorization.yaml.inc
+    - build-discarder:
+        days-to-keep: 30
+    parameters:
+    - string:
+        name: CI_REFSPEC
+        default: +refs/heads/master:refs/remotes/origin/master
+    - string:
+        name: FILTER
+        default:
+        description: Optional job/group filter string (e.g. <code>juno</code>).
+    builders:
+    - shell: !include-raw: scripts/clone.sh
+    - shell: |
+        mkdir -p output
+
+        cd tf-a-ci-scripts &&
+          bash script/graphs/categorize-tests.bash ${FILTER} \
+            > ../output.png 2> ../output.tsv
+    publishers:
+    - archive:
+        artifacts: output.*

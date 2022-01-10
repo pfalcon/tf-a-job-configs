@@ -1,0 +1,38 @@
+- job:
+    name: tf-a-sloc-visualization
+    description: >-
+      Generates a visualization of programming languages used by the code-base.
+    node: docker-amd64-tf-a-jammy
+    concurrent: true
+    properties:
+    - authorization: !include: authorization.yaml.inc
+    - build-discarder:
+        days-to-keep: 30
+    parameters:
+    - string:
+        name: CI_REFSPEC
+        default: +refs/heads/master:refs/remotes/origin/master
+    - string:
+        name: TF_GERRIT_PROJECT
+        default: TF-A/trusted-firmware-a
+    - string:
+        name: TF_GERRIT_BRANCH
+        default: refs/heads/master
+    - string:
+        name: TF_GERRIT_REFSPEC
+        default: +refs/heads/master:refs/remotes/origin/master
+    - string:
+        name: DIRECTORIES
+        default: . ./drivers ./plat ./tools
+        description: List of directories to analyze.
+    builders:
+    - shell: !include-raw: scripts/clone.sh
+    - shell: |
+        mkdir -p output
+
+        cd trusted-firmware-a &&
+          bash ../tf-a-ci-scripts/script/graphs/sloc-viz.bash ${DIRECTORIES} \
+            > ../output.png 2> ../output.tsv
+    publishers:
+    - archive:
+        artifacts: output.*
