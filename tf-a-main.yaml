@@ -258,4 +258,4 @@
         condition-best: SUCCESS
         condition-worst: SUCCESS
         steps:
-        - shell: bash "${WORKSPACE}/tf-a-ci-scripts/script/scratch_scripts/fast-forward-master.sh
+        - shell: bash "${WORKSPACE}/tf-a-ci-scripts/script/scratch_scripts/fast-forward-master.sh"
