@@ -120,10 +120,11 @@ mkdir -p /arm/pdsw/tools/gcc-linaro-6.2.1-2016.11-x86_64_aarch64-linux-gnu
 ln -s ${TOOLS_DIR}/gcc-linaro-6.2.1-2016.11-x86_64_aarch64-linux-gnu/bin \
    /arm/pdsw/tools/gcc-linaro-6.2.1-2016.11-x86_64_aarch64-linux-gnu/bin
 
-# CC=/arm/warehouse/Distributions/FA/ARMCompiler/6.8/25/standalone-linux-x86_64-rel/bin/armclang
-mkdir -p /arm/warehouse/Distributions/FA/ARMCompiler/6.8/25/standalone-linux-x86_64-rel
-ln -s ${TOOLS_DIR}/armclang-6.8/bin \
-      /arm/warehouse/Distributions/FA/ARMCompiler/6.8/25/standalone-linux-x86_64-rel/bin
+# CC=/arm/warehouse/Distributions/FA/ARMCompiler/6.18/19/standalone-linux-x86_64-rel/bin/armclang
+# FIXME: link to ARMCompiler 6.17 until 6.18 is available on Open-CI.
+mkdir -p /arm/warehouse/Distributions/FA/ARMCompiler/6.18/19/standalone-linux-x86_64-rel
+ln -s ${TOOLS_DIR}/armclang-6.17/bin \
+      /arm/warehouse/Distributions/FA/ARMCompiler/6.18/19/standalone-linux-x86_64-rel/bin
 
 # Mandatory workspace
 export workspace="${workspace:-${WORKSPACE}/workspace}"
