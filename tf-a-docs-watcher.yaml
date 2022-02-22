@@ -23,8 +23,8 @@
         server-name: 'review.trustedfirmware.org'
         projects:
         - branches:
-          - branch-compare-type: ANT
-            branch-pattern: master
+          - branch-compare-type: PLAIN
+            branch-pattern: 'master'
           project-compare-type: PLAIN
           project-pattern: 'TF-A/trusted-firmware-a'
         trigger-on:
