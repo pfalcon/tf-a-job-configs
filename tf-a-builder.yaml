@@ -9,7 +9,7 @@
       Trusted Firmware A (TF-A) builder
     properties:
         - build-discarder:
-            days-to-keep: 45
+            days-to-keep: 15
         - authorization:
             !include: authorization.yaml.inc
     parameters:
