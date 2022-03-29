@@ -1,0 +1,46 @@
+- job:
+    name: tf-a-tftf-docs-watcher
+    node: docker-amd64-tf-a-bionic
+    project-type: freestyle
+    concurrent: false
+    description:
+      Triggers whenever a code change is merged into the master branch of the
+      TF-A-Tests repository. Executes a webhook to trigger the ReadTheDocs
+      service to build a fresh copy of the documentation for one or more
+      branches.
+    disabled: false
+    builders:
+    - shell: |-
+        #!/bin/bash -e
+        echo "Notifying ReadTheDocs of changes on: $RTD_BRANCHES"
+        curl -X POST -d "branches=$RTD_BRANCHES" -d "token=$RTD_TOKEN" https://readthedocs.org/api/v2/webhook/trustedfirmware-a-tests/104345/
+    properties:
+    - build-discarder:
+        days-to-keep: 7
+        num-to-keep: 10
+    triggers:
+    - gerrit:
+        silent: true
+        server-name: 'review.trustedfirmware.org'
+        projects:
+        - branches:
+          - branch-compare-type: PLAIN
+            branch-pattern: master
+          project-compare-type: PLAIN
+          project-pattern: 'TF-A/tf-a-tests'
+        trigger-on:
+        - ref-updated-event
+    wrappers:
+    - timestamps
+    - credentials-binding:
+      - text:
+          credential-id: Trusted_Firmware_Tests_ReadTheDocs_Token
+          variable: RTD_TOKEN
+    parameters:
+    - string:
+        name: RTD_BRANCHES
+        default: master
+        description: |
+          The branch, or branches, to rebuild the documentation for.
+    publishers:
+    - workspace-cleanup
