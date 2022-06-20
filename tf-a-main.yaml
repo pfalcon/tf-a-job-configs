@@ -106,7 +106,7 @@
           predefined-parameters: TEST_GROUPS=tf-l1-build-clang
           property-file: tf-a-env.param
     - multijob:
-        name: TFTF Tests
+        name: TFTF Tests for FVP
         condition: COMPLETED
         projects:
         - name: tf-a-ci-gateway
@@ -117,7 +117,7 @@
         - name: tf-a-ci-gateway
           current-parameters: true
           kill-phase-on: NEVER
-          predefined-parameters: TEST_GROUPS=tftf-l1-fvp tftf-l1-juno tftf-l2-fvp-auxiliary
+          predefined-parameters: TEST_GROUPS=tftf-l1-fvp tftf-l2-fvp-auxiliary
           property-file: tf-a-tests-env.param
         - name: tf-a-ci-gateway
           current-parameters: true
@@ -147,11 +147,6 @@
           current-parameters: true
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=tf-l2-boot-tests-rootfs
-          property-file: tf-a-env.param
-        - name: tf-a-ci-gateway
-          current-parameters: true
-          kill-phase-on: NEVER
-          predefined-parameters: TEST_GROUPS=tf-l2-boot-tests-juno
           property-file: tf-a-env.param
         - name: tf-a-ci-gateway
           current-parameters: true
@@ -191,6 +186,25 @@
           current-parameters: true
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=tf-l2-boot-tests-bl2_el3
+          property-file: tf-a-env.param
+    - multijob:
+        name: Juno Boot Tests
+        condition: COMPLETED
+        projects:
+        - name: tf-a-ci-gateway
+          current-parameters: true
+          kill-phase-on: NEVER
+          predefined-parameters: TEST_GROUPS=tf-l1-boot-tests-juno
+          property-file: tf-a-env.param
+        - name: tf-a-ci-gateway
+          current-parameters: true
+          kill-phase-on: NEVER
+          predefined-parameters: TEST_GROUPS=tf-l2-boot-tests-juno
+          property-file: tf-a-env.param
+        - name: tf-a-ci-gateway
+          current-parameters: true
+          kill-phase-on: NEVER
+          predefined-parameters: TEST_GROUPS=tftf-l1-juno
           property-file: tf-a-env.param
     - multijob:
         name: Miscellaneous tests

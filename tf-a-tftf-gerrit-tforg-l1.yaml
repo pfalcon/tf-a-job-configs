@@ -100,7 +100,7 @@
         - kill-phase-on: NEVER
           name: tf-a-ci-gateway
           predefined-parameters: |
-            TEST_GROUPS=tftf-l1-fvp tftf-l1-juno
+            TEST_GROUPS=tftf-l1-fvp
           property-file: env.param
     triggers:
     - gerrit:
