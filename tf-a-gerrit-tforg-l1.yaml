@@ -104,15 +104,6 @@
           predefined-parameters: |
             TEST_GROUPS=tf-l1-build-fvp tf-l1-build-juno tf-l1-build-clang tf-l1-build-plat spm-l1-build-tests
           property-file: env.param
-    - multijob:
-        condition: COMPLETED
-        name: Run boot tests
-        projects:
-        - kill-phase-on: NEVER
-          name: tf-a-ci-gateway
-          predefined-parameters: |
-            TEST_GROUPS=tf-l1-boot-tests-aarch32 tf-l1-boot-tests-bl2_el3 tf-l1-boot-tests-cortex tf-l1-boot-tests-foundation tf-l1-boot-tests-gicv2 tf-l1-boot-tests-misc
-          property-file: env.param
     triggers:
     - gerrit:
         server-name: review.trustedfirmware.org
