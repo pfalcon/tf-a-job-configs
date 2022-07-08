@@ -51,6 +51,7 @@ ls -l ${WORKSPACE}
 if [ -n "${QA_SERVER_VERSION}" ]; then
     if [ -n "${GERRIT_CHANGE_NUMBER}" ] && [ -n "${GERRIT_PATCHSET_NUMBER}" ]; then
         curl \
+            --fail \
             --retry 4 \
             -X POST \
             --header "Auth-Token: ${QA_REPORTS_TOKEN}" \
@@ -58,6 +59,7 @@ if [ -n "${QA_SERVER_VERSION}" ]; then
     fi
 
     TESTJOB_ID=$(curl \
+        --fail \
         --retry 4 \
         -X POST \
         --header "Auth-Token: ${QA_REPORTS_TOKEN}" \
@@ -81,7 +83,7 @@ if [ -n "${QA_SERVER_VERSION}" ]; then
                 break
             fi
             sleep 30
-            LAVAJOB_ID=$(curl --retry 4 ${QA_SERVER}/api/testjobs/${TESTJOB_ID}/?fields=job_id)
+            LAVAJOB_ID=$(curl --fail --retry 4 ${QA_SERVER}/api/testjobs/${TESTJOB_ID}/?fields=job_id)
 
             # Get the job_id value (whatever it is)
             LAVAJOB_ID=$(echo ${LAVAJOB_ID} | jq '.job_id')
