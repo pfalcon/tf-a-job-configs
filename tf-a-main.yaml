@@ -253,10 +253,10 @@
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=tf-l1-check-docs
           property-file: tf-a-env.param
-#    - multijob:
-#        name: Generate visualizations
-#        condition: COMPLETED
-#        projects:
+    - multijob:
+       name: Generate visualizations
+       condition: COMPLETED
+       projects:
 #        - name: tf-a-sloc-visualization
 #          current-parameters: true
 #          kill-phase-on: NEVER
@@ -265,6 +265,11 @@
 #          current-parameters: true
 #          kill-phase-on: NEVER
 #          property-file: tf-a-env.param
+        - name: tf-a-test-result-visualization
+          current-parameters: true
+          kill-phase-on: NEVER
+          predefined-parameters: TARGET_BUILD=${JOB_NAME}/${BUILD_NUMBER}
+          property-file: tf-a-env.param
     # Run the unstable TF-A Tests at the end but do not let their results
     # participate in the job's success/failure.
     - trigger-builds:

@@ -1,0 +1,66 @@
+- job:
+    name: tf-a-test-result-visualization
+    node: docker-amd64-tf-a-bionic
+    project-type: freestyle
+    concurrent: true
+    description: >-
+      Generates a visualization of the test results from the current job.
+    disabled: false
+    properties:
+      - build-discarder:
+          days-to-keep: 14
+      - authorization:
+          !include: authorization.yaml.inc
+    parameters:
+      - string:
+          name: TF_GERRIT_PROJECT
+          default: 'TF-A/trusted-firmware-a'
+      - string:
+          name: TF_GERRIT_BRANCH
+          default: 'refs/heads/integration'
+      - string:
+          name: TF_GERRIT_REFSPEC
+          default: '+refs/heads/integration:refs/remotes/origin/integration'
+      - string:
+          name: TFTF_GERRIT_PROJECT
+          default: 'TF-A/tf-a-tests'
+      - string:
+          name: TFTF_GERRIT_BRANCH
+          default: 'refs/heads/master'
+      - string:
+          name: TFTF_GERRIT_REFSPEC
+          default: '+refs/heads/master:refs/remotes/origin/master'
+      - string:
+          name: CI_REFSPEC
+          default: '+refs/heads/master:refs/remotes/origin/master'
+      - string:
+          name: TARGET_BUILD
+          default: 'tf-a-main/1'
+          description: 'Target build to analyze.'
+    builders:
+      - shell: |
+          #!/bin/bash
+
+          bash ${WORKSPACE}/tf-a-ci-scripts/script/graphs/tf-main-results.bash \
+              "${JENKINS_URL}job/${TARGET_BUILD}"
+    publishers:
+      - postbuildscript:
+          builders:
+            - role: SLAVE
+              build-on:
+                - SUCCESS
+                - FAILURE
+                - UNSTABLE
+                - ABORTED
+                - NOT_BUILT
+              build-steps:
+                - shell: |-
+                    #!/bin/bash -e
+                    export CI_ROOT=${PWD}/tf-a-ci-scripts
+                    bash "$CI_ROOT/job/tf-ci-gateway/generate_report.sh" -t
+      - archive:
+          artifacts: report.html, tf-a-main*.png, tf-a-main*.csv
+      - groovy-postbuild:
+          script:
+            !include-raw:
+              - tf-a-ci-gateway/postbuild.groovy
