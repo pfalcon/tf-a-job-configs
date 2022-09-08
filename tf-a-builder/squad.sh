@@ -76,7 +76,7 @@ if [ -n "${QA_SERVER_VERSION}" ]; then
         renumber='^[0-9]+$'
         LAVAJOB_ID="null"
         iter=0
-        max_tries=10
+        max_tries=120 # run retries for an hour
         while ! [[ $LAVAJOB_ID =~ $renumber ]]; do
             if [ $iter -eq $max_tries ] ; then
                 LAVAJOB_ID=''
