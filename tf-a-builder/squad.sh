@@ -67,6 +67,12 @@ if [ -n "${QA_SERVER_VERSION}" ]; then
         --form definition=@artefacts/debug/job.yaml \
         ${QA_SERVER}/api/submitjob/${QA_SERVER_TEAM}/${QA_SERVER_PROJECT}/${QA_SERVER_VERSION}/${DEVICE_TYPE})
 
+    # SQUAD will send 400, curl error code 22, on bad test definition
+    if [ "$?" = "22" ]; then
+        echo "Bad test definition!!"
+        exit 1
+    fi
+
     if [ -n "${TESTJOB_ID}" ]; then
         echo "TEST JOB URL: ${QA_SERVER}/testjob/${TESTJOB_ID} TEST JOB ID: ${TESTJOB_ID}"
 
