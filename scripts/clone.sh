@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright (c) 2021 Arm Limited. All rights reserved.
+# Copyright (c) 2021-2022 Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -41,12 +41,14 @@ REFSPEC_MASTER="refs/heads/master"
 GIT_REPO="https://git.trustedfirmware.org"
 GERRIT_HOST="https://review.trustedfirmware.org"
 GIT_CLONE_PARAMS=""
+SSH_PARAMS="-p 29418 -i ${CI_BOT_KEY}"
+GERRIT_QUERY_PARAMS="--format=JSON --patch-sets --current-patch-set status:open"
 
 # Defaults Projects
-TF_GERRIT_PROJECT="${GERRIT_HOST}/${TF_GERRIT_PROJECT:-TF-A/trusted-firmware-a}"
-TFTF_GERRIT_PROJECT="${GERRIT_HOST}/${TFTF_GERRIT_PROJECT:-/TF-A/tf-a-tests}"
-CI_PROJECT="${CI_PROJECT:-${GIT_REPO}/ci/tf-a-ci-scripts.git}"
-JOBS_PROJECT="${JOB_PROJECT:-${GIT_REPO}/ci/tf-a-job-configs.git}"
+TF_GERRIT_PROJECT="${TF_GERRIT_PROJECT:-TF-A/trusted-firmware-a}"
+TFTF_GERRIT_PROJECT="${TFTF_GERRIT_PROJECT:-TF-A/tf-a-tests}"
+CI_GERRIT_PROJECT="${CI_GERRIT_PROJECT:-ci/tf-a-ci-scripts}"
+JOBS_PROJECT="${JOBS_PROJECT:-ci/tf-a-job-configs.git}"
 
 # Default Reference specs
 TF_GERRIT_REFSPEC="${TF_GERRIT_REFSPEC:-${REFSPEC_MASTER}}"
@@ -54,12 +56,13 @@ TFTF_GERRIT_REFSPEC="${TFTF_GERRIT_REFSPEC:-${REFSPEC_MASTER}}"
 CI_REFSPEC="${CI_REFSPEC:-${REFSPEC_MASTER}}"
 JOBS_REFSPEC="${JOBS_REFSPEC:-${REFSPEC_MASTER}}"
 
-# Array containing "<repo url>;"<repo name>;<refspec>" elements
+JOBS_REPO_NAME="tf-a-job-configs"
+
+# Array containing "<repo host>;<project>;<repo name>;<refspec>" elements
 repos=(
-    "${CI_PROJECT};tf-a-ci-scripts;${CI_REFSPEC}"
-    "${JOBS_PROJECT};tf-a-job-configs;${JOBS_REFSPEC}"
-    "${TF_GERRIT_PROJECT};trusted-firmware-a;${TF_GERRIT_REFSPEC}"
-    "${TFTF_GERRIT_PROJECT};tf-a-tests;${TFTF_GERRIT_REFSPEC}"
+    "${GERRIT_HOST};${CI_GERRIT_PROJECT};tf-a-ci-scripts;${CI_REFSPEC}"
+    "${GERRIT_HOST};${TF_GERRIT_PROJECT};trusted-firmware-a;${TF_GERRIT_REFSPEC}"
+    "${GERRIT_HOST};${TFTF_GERRIT_PROJECT};tf-a-tests;${TFTF_GERRIT_REFSPEC}"
 )
 
 # Take into consideration non-CI runs where SHARE_FOLDER variable
@@ -72,17 +75,44 @@ if [ -z "${SHARE_FOLDER}" ]; then
     SHARE_FOLDER=${SHARE_VOLUME}/${JOB_NAME}/${BUILD_NUMBER}
 fi
 
+# Clone JOBS_PROJECT first, since we need a helper script there
+if [ ! -d ${SHARE_FOLDER}/${JOBS_REPO_NAME} ]; then
+    git clone ${GIT_CLONE_PARAMS} ${GIT_REPO}/${JOBS_PROJECT} ${SHARE_FOLDER}/${JOBS_REPO_NAME}
+    cd ${SHARE_FOLDER}/${JOBS_REPO_NAME}
+    git fetch origin ${JOBS_REFSPEC}
+else
+    cd ${SHARE_FOLDER}/${JOBS_REPO_NAME}
+fi
+git log -1
+cd $OLDPWD
+cp -a -f ${SHARE_FOLDER}/${JOBS_REPO_NAME} ${PWD}/${JOBS_REPO_NAME}
+
 # clone git repos
 for repo in ${repos[@]}; do
 
     # parse the repo elements
-    REPO_URL="$(echo "${repo}" | awk -F ';' '{print $1}')"
-    REPO_NAME="$(echo "${repo}" | awk -F ';' '{print $2}')"
-    REPO_REFSPEC="$(echo "${repo}" | awk -F ';' '{print $3}')"
+    REPO_HOST="$(echo "${repo}" | awk -F ';' '{print $1}')"
+    REPO_PROJECT="$(echo "${repo}" | awk -F ';' '{print $2}')"
+    REPO_NAME="$(echo "${repo}" | awk -F ';' '{print $3}')"
+    REPO_DEFAULT_REFSPEC="$(echo "${repo}" | awk -F ';' '{print $4}')"
+    REPO_URL="${REPO_HOST}/${REPO_PROJECT}"
+    REPO_REFSPEC="${REPO_DEFAULT_REFSPEC}"
 
-    # clone and checkout in case it does not exit
+    # clone and checkout in case it does not exist
     if [ ! -d ${SHARE_FOLDER}/${REPO_NAME} ]; then
         git clone ${GIT_CLONE_PARAMS} ${REPO_URL} ${SHARE_FOLDER}/${REPO_NAME}
+
+        # Repo synchronization
+        if [ -n "${GERRIT_TOPIC}" -a "${REPO_HOST}" = "${GERRIT_HOST}" ]; then
+            echo "Got Gerrit Topic: ${GERRIT_TOPIC}"
+            REPO_REFSPEC="$(ssh ${SSH_PARAMS} ${CI_BOT_USERNAME}@${REPO_HOST#https://} gerrit query ${GERRIT_QUERY_PARAMS} \
+                            project:${REPO_PROJECT} topic:${GERRIT_TOPIC} | ${SHARE_FOLDER}/${JOBS_REPO_NAME}/scripts/parse_refspec.py || true)"
+            if [ -z "${REPO_REFSPEC}" ]; then
+                REPO_REFSPEC="${REPO_DEFAULT_REFSPEC}"
+                echo "Roll back to \"${REPO_REFSPEC}\" for \"${REPO_PROJECT}\""
+            fi
+            echo "Checkout refspec \"${REPO_REFSPEC}\" from repository \"${REPO_NAME}\""
+        fi
 
         # fetch and checkout the corresponding refspec
         cd ${SHARE_FOLDER}/${REPO_NAME}
