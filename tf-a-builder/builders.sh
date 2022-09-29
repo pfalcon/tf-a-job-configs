@@ -39,18 +39,12 @@ fi
 
 cd ${WORKSPACE}
 
-# Several test descriptions are pending to be included in OpenCI, so for the moment
-# blocklist these.
-# 1. coverity-tf-misra: https://projects.linaro.org/browse/TFC-10
-# 2. fvp-tbb-mbedtls-upcounter,fvp-fwu:fvp-tftf.fwu-aemv8a.invalid_nvcounter-debug: Pending TFC ticket
-# 3. Failure at LAVA job https://tf.validation.linaro.org/scheduler/job/142101
-#    TFC ticket https://projects.linaro.org/browse/TFC-70
+# coverity-tf-misra: https://projects.linaro.org/browse/TFC-10 pending to
+# be included in OpenCI, hence it is blocklisted for now.
 
 blocklist="blocklist.txt"
 cat << EOF > "${blocklist}"
 coverity-tf-misra
-fvp-tbb-mbedtls-upcounter,fvp-fwu,nil,nil,nil:fvp-tftf.fwu-aemv8a.invalid_nvcounter-debug
-fvp-linux-as-bl33,nil,nil,nil,nil:fvp-linux.bl33-dtb-aemv8a.linux.bl33-debug
 EOF
 
 if echo "${TEST_DESC}" | grep -F -f ${blocklist} - ; then
