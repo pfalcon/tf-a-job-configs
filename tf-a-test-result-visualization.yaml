@@ -38,6 +38,7 @@
           default: 'tf-a-main/1'
           description: 'Target build to analyze.'
     builders:
+      - shell: !include-raw: scripts/clone.sh
       - shell: |
           #!/bin/bash
 
