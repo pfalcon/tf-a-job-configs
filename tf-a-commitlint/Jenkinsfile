@@ -44,6 +44,7 @@ pipeline {
 
         stage('Lint') {
             steps {
+                sh "BASH_ENV=$NVM_DIR/nvm.sh bash -c '[ -f .nvmrc ] && nvm use'"
                 sh "BASH_ENV=$NVM_DIR/nvm.sh bash -c 'npm install --no-save commitlint'"
                 sh "BASH_ENV=$NVM_DIR/nvm.sh bash -c 'npx commitlint --from=${mergeBase}'"
             }
