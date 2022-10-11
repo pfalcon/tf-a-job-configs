@@ -41,7 +41,7 @@ REFSPEC_MASTER="refs/heads/master"
 GIT_REPO="https://git.trustedfirmware.org"
 GERRIT_HOST="https://review.trustedfirmware.org"
 GIT_CLONE_PARAMS=""
-SSH_PARAMS="-p 29418 -i ${CI_BOT_KEY}"
+SSH_PARAMS="-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p 29418 -i ${CI_BOT_KEY}"
 GERRIT_QUERY_PARAMS="--format=JSON --patch-sets --current-patch-set status:open"
 
 # Defaults Projects
