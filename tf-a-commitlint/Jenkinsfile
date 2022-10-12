@@ -46,12 +46,12 @@ pipeline {
             steps {
                 script {
                     if (fileExists('.nvmrc')) {
-                        sh "BASH_ENV=$NVM_DIR/nvm.sh bash -c 'nvm install'"
+                        sh "nvm install"
                     }
                 }
 
-                sh "BASH_ENV=$NVM_DIR/nvm.sh bash -c 'npm install --no-save commitlint'"
-                sh "BASH_ENV=$NVM_DIR/nvm.sh bash -c 'npx commitlint --from=${mergeBase}'"
+                sh "npm install --no-save commitlint"
+                sh "npx commitlint --from=${mergeBase}"
             }
         }
     }
