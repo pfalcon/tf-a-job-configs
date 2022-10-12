@@ -108,7 +108,7 @@ if [ -n "${QA_SERVER_VERSION}" ]; then
 
             # if timeout on waiting for LAVA to complete, create an 'artificial' lava.log indicating
             # job ID and timeout seconds
-            if [ ! wait_lava_job ${LAVAJOB_ID} ]; then
+            if ! wait_lava_job ${LAVAJOB_ID}; then
                 echo "Stopped monitoring LAVA JOB ${LAVAJOB_ID}, likely stuck or timeout too short?" | tee "${WORKSPACE}/lava.log"
                 exit 1
             else
