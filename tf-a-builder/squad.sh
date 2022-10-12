@@ -15,12 +15,13 @@ wait_lava_job() {
         sleep $interval
         resilient_cmd lavacli jobs show $id | tee "${WORKSPACE}/lava-progress.show"
         if grep 'state.*: Finished' "${WORKSPACE}/lava-progress.show"; then
-            echo finished
-            return
+            # finished
+            return 0
         fi
         ((t -= interval))
     done
-    echo timeout
+    # timeout
+    return 1
 }
 
 # Run the given command passed through parameters, if fails, try
@@ -105,12 +106,10 @@ if [ -n "${QA_SERVER_VERSION}" ]; then
 
             resilient_cmd lavacli identities add --username ${LAVA_USER} --token ${LAVA_TOKEN} --uri "https://${LAVA_SERVER}/RPC2" default
 
-            wait_status="$(wait_lava_job ${LAVAJOB_ID})"
-
             # if timeout on waiting for LAVA to complete, create an 'artificial' lava.log indicating
             # job ID and timeout seconds
-            if [ "${wait_status}" == "timeout" ]; then
-                echo "Stopped monitoring LAVA JOB ${LAVAJOB_ID}, likely stuck or timeout too short?" > "${WORKSPACE}/lava.log"
+            if [ ! wait_lava_job ${LAVAJOB_ID} ]; then
+                echo "Stopped monitoring LAVA JOB ${LAVAJOB_ID}, likely stuck or timeout too short?" | tee "${WORKSPACE}/lava.log"
                 exit 1
             else
                 # Retrieve the test job plain log which is a yaml format file from LAVA
