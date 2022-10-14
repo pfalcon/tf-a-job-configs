@@ -118,12 +118,14 @@ for repo in ${repos[@]}; do
         cd ${SHARE_FOLDER}/${REPO_NAME}
         git fetch ${REPO_URL} ${REPO_REFSPEC}
         git checkout FETCH_HEAD
+        echo "Freshly cloned ${REPO_URL} (refspec ${REPO_REFSPEC}):"
         git log -1
         cd $OLDPWD
 
     else
         # otherwise just show the head's log
         cd ${SHARE_FOLDER}/${REPO_NAME}
+        echo "Using existing shared folder checkout for ${REPO_URL}:"
         git log -1
         cd $OLDPWD
     fi
