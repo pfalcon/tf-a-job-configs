@@ -78,7 +78,7 @@
                 - juno-default
                 - juno-tspd
     triggers:
-#    - timed : 'H 2 * * *'
+    - timed : 'H 2 * * *'
 #    - gerrit:
 #        silent: true
 #        server-name: 'review.trustedfirmware.org'
