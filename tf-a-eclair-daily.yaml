@@ -1,0 +1,124 @@
+- job:
+    name: tf-a-eclair-daily
+    project-type: matrix
+    concurrent: true
+    disabled: false
+    defaults: global
+    Description: |
+      ECLAIR (MISRA compliance) testing of TF-A
+    properties:
+        - build-discarder:
+            days-to-keep: 45
+        - authorization:
+            !include: authorization.yaml.inc
+    parameters:
+        - string:
+            name: MAKE_TARGET
+            default: ''
+            description: |
+              TF-A make target
+        - string:
+            name: GERRIT_HOST
+            default: 'review.trustedfirmware.org'
+        - string:
+            name: GERRIT_PROJECT
+            default: 'TF-A/trusted-firmware-a'
+            description: |
+              Git project to build (also set by Gerrit trigger)
+        - string:
+            name: GERRIT_REFNAME
+            default: 'integration'
+            description: |
+              Git branch to build (also set by Gerrit trigger)
+        - string:
+            name: GERRIT_NEWREV
+            default: ''
+            description: |
+              Git revision to build (also set by Gerrit ref-updated trigger)
+        - string:
+            name: MBEDTLS_URL
+            default: 'https://github.com/ARMmbed/mbedtls/archive/mbedtls-2.28.0.tar.gz'
+            description: |
+              URL of mbedTLS library to use in build (only for some configurations)
+        - string:
+            name: SHARE_FOLDER
+            default: '/srv/shared/${JOB_NAME}/${BUILD_NUMBER}'
+            description: 'Folder containing shared repositories for downstream pipeline jobs'
+    axes:
+        - axis:
+            type: slave
+            name: label
+            values:
+                - docker-tf-a-eclair
+        - axis:
+            type: user-defined
+            name: TF_CONFIG
+            values:
+                - fvp-aarch32-default
+#                - fvp-aarch32-enable-runtime-instr
+#                - fvp-aarch32-rst-to-sp-min
+#                - fvp-boot-el3-payload
+                - fvp-default
+#                - fvp-enable-runtime-instr
+#                - fvp-ext-pstate-ea-el3
+                # Causes runtime error in ECLAIR: https://support.bugseng.com/mantis/view.php?id=5083
+                #- fvp-mb_hash256-tbb_hash256-romlib
+#                - fvp-no-cohmem
+#                - fvp-opteed
+#                - fvp-r-default
+#                - fvp-rst-bl31
+#                - fvp-tspd
+#                - fvp-tspd-gicv2-symmetric-model
+#                - fvp-tspd-irq2el3
+#                - fvp-tspd-quad-cluster
+#                - fvp-tspd-tbb-mbedtls
+#                - fvp-tspd-tsp-async
+#                - juno-aarch32-rst-to-sp-min
+#                - juno-aarch32-rst-to-sp-min-enable-runtime-instr
+#                - juno-default
+#                - juno-tspd
+    triggers:
+#    - timed : 'H 2 * * *'
+#    - gerrit:
+#        silent: true
+#        server-name: 'review.trustedfirmware.org'
+#        projects:
+#        - branches:
+#          - branch-compare-type: PLAIN
+#            branch-pattern: integration
+#          project-compare-type: PLAIN
+#          project-pattern: 'TF-A/trusted-firmware-a'
+#        trigger-on:
+#        - ref-updated-event
+    wrappers:
+        - timestamps
+        - timeout:
+            timeout: 120
+            fail: true
+    builders:
+    - shell: |
+        #!/bin/bash
+        set -ex
+        pwd
+        git clone https://git.trustedfirmware.org/ci/tf-a-ci-scripts.git
+        git clone https://${GERRIT_HOST}/${GERRIT_PROJECT} -b ${GERRIT_REFNAME}
+        ls -l
+        if [ -n "${GERRIT_NEWREV}" ]; then
+            (cd $(basename ${GERRIT_PROJECT}); git checkout ${GERRIT_NEWREV})
+        else
+            # Checkout last commit from yesterday, to have a stable commit for
+            # multiple builds.
+            (cd $(basename ${GERRIT_PROJECT}); git checkout $(git rev-list -n1 --before="today" HEAD))
+        fi
+        (cd $(basename ${GERRIT_PROJECT}); git log -n1)
+        detachLicense 2100
+        trap "returnLicense" EXIT
+        tf-a-ci-scripts/eclair/analyze.sh ${TF_CONFIG}
+    publishers:
+        - archive:
+            artifacts: 'ECLAIR/**'
+            excludes: 'ECLAIR/out/.data/**'
+            latest-only: false
+            allow-empty: true
+        - email:
+            recipients: 'paul.sokolovsky@linaro.org'
