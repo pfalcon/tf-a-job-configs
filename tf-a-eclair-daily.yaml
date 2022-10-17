@@ -55,28 +55,28 @@
             name: TF_CONFIG
             values:
                 - fvp-aarch32-default
-#                - fvp-aarch32-enable-runtime-instr
-#                - fvp-aarch32-rst-to-sp-min
-#                - fvp-boot-el3-payload
+                - fvp-aarch32-enable-runtime-instr
+                - fvp-aarch32-rst-to-sp-min
+                - fvp-boot-el3-payload
                 - fvp-default
-#                - fvp-enable-runtime-instr
-#                - fvp-ext-pstate-ea-el3
+                - fvp-enable-runtime-instr
+                - fvp-ext-pstate-ea-el3
                 # Causes runtime error in ECLAIR: https://support.bugseng.com/mantis/view.php?id=5083
                 #- fvp-mb_hash256-tbb_hash256-romlib
-#                - fvp-no-cohmem
-#                - fvp-opteed
-#                - fvp-r-default
-#                - fvp-rst-bl31
-#                - fvp-tspd
-#                - fvp-tspd-gicv2-symmetric-model
-#                - fvp-tspd-irq2el3
-#                - fvp-tspd-quad-cluster
-#                - fvp-tspd-tbb-mbedtls
-#                - fvp-tspd-tsp-async
-#                - juno-aarch32-rst-to-sp-min
-#                - juno-aarch32-rst-to-sp-min-enable-runtime-instr
-#                - juno-default
-#                - juno-tspd
+                - fvp-no-cohmem
+                - fvp-opteed
+                - fvp-r-default
+                - fvp-rst-bl31
+                - fvp-tspd
+                - fvp-tspd-gicv2-symmetric-model
+                - fvp-tspd-irq2el3
+                - fvp-tspd-quad-cluster
+                - fvp-tspd-tbb-mbedtls
+                - fvp-tspd-tsp-async
+                - juno-aarch32-rst-to-sp-min
+                - juno-aarch32-rst-to-sp-min-enable-runtime-instr
+                - juno-default
+                - juno-tspd
     triggers:
 #    - timed : 'H 2 * * *'
 #    - gerrit:
