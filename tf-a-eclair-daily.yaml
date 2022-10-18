@@ -11,6 +11,11 @@
             days-to-keep: 45
         - authorization:
             !include: authorization.yaml.inc
+        - throttle:
+            option: category
+            categories: [eclair-daily]
+            matrix-builds: false
+            matrix-configs: true
     parameters:
         - string:
             name: MAKE_TARGET
