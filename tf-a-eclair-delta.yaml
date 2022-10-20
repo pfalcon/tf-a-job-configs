@@ -13,6 +13,11 @@
             artifact-num-to-keep: 100
         - authorization:
             !include: authorization.yaml.inc
+        - throttle:
+            option: category
+            categories: [eclair]
+            matrix-builds: false
+            matrix-configs: true
     parameters:
         - string:
             name: MAKE_TARGET
