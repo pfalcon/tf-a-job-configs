@@ -121,7 +121,7 @@
         tf-a-ci-scripts/eclair/analyze.sh ${TF_CONFIG}
     publishers:
         - archive:
-            artifacts: 'ECLAIR/**'
+            artifacts: 'ECLAIR/**, index.html'
             excludes: 'ECLAIR/out/.data/**'
             latest-only: false
             allow-empty: true
