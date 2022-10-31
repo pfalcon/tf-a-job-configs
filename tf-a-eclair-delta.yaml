@@ -26,7 +26,7 @@
               TF-A make target
         - string:
             name: DEBUG
-            default: '0'
+            default: '1'
             description: |
               TF-A make DEBUG setting
         - string:
