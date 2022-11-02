@@ -28,12 +28,6 @@ messages
 
 USAGE = f"Usage: {sys.argv[0]} /path/to/lava-job-plain-log.log"
 
-separated_log_file = {"all": "lava.log", \
-                      "target": "lava-uart0.log", \
-                      "feedback-terminal_1": "lava-uart1.log", \
-                      "feedback-terminal_2": "lava-uart2.log", \
-                      "feedback-terminal_3": "lava-uart3.log", \
-                      "feedback": "feedback.log"}
 opened_logfile = dict()
 
 if __name__ == "__main__":
@@ -67,30 +61,27 @@ if __name__ == "__main__":
             copyfile(plain_log, des_dir+"/lava-raw-debug.log")
             sys.exit(1)
         try:
-            full_test_log = "{}/{}".format(des_dir, separated_log_file["all"])
+            full_test_log = "{}/{}".format(des_dir, "lava.log")
             opened_logfile["all"] = open(full_test_log, "w")
             for line in log_list:
                 level = line["lvl"]
                 msg = line["msg"]
                 dt  = line["dt"]
                 if (level == "target") or (level == "feedback"):
-                    log_file_id = level
-                    if "ns" in line:
-                        log_file_id = "{}-{}".format(log_file_id, line["ns"])
-                        if log_file_id not in separated_log_file:
-                            log_file_id = "feedback"
-                    if log_file_id not in opened_logfile:
-                        des_log_file = "{}/{}".format(des_dir, separated_log_file[log_file_id])
-                        opened_logfile[log_file_id] = open(des_log_file, "w")
+                    namespace = line["ns"] if "ns" in line else level
+
+                    if namespace not in opened_logfile:
+                        des_log_file = f"{des_dir}/lava-{namespace}.log"
+                        opened_logfile[namespace] = open(des_log_file, "w")
                     try:
-                        opened_logfile[log_file_id].write("{}\n".format(msg))
+                        opened_logfile[namespace].write("{}\n".format(msg))
                     except UnicodeEncodeError:
                         msg = (
                             msg
                             .encode("ascii", errors="replace")
                             .decode("ascii")
                         )
-                        opened_logfile[log_file_id].write("{}\n".format(msg))
+                        opened_logfile[namespace].write("{}\n".format(msg))
                 # log to 'lava.log'
                 opened_logfile["all"].write("{} {}\n".format(dt.split(".")[0], msg))
         except IOError as err:
