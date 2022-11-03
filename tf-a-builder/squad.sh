@@ -65,7 +65,7 @@ if [ -n "${QA_SERVER_VERSION}" ]; then
         -X POST \
         --header "Auth-Token: ${QA_REPORTS_TOKEN}" \
         --form backend=${LAVA_SERVER} \
-        --form definition=@artefacts/debug/job.yaml \
+        --form definition=@artefacts-lava/job.yaml \
         ${QA_SERVER}/api/submitjob/${QA_SERVER_TEAM}/${QA_SERVER_PROJECT}/${QA_SERVER_VERSION}/${DEVICE_TYPE})
 
     # SQUAD will send 400, curl error code 22, on bad test definition
@@ -122,7 +122,7 @@ if [ -n "${QA_SERVER_VERSION}" ]; then
                 ${WORKSPACE}/tf-a-job-configs/tf-a-builder/feedback-trace-splitter.sh \
                             ${WORKSPACE}/trusted-firmware-a \
                             ${WORKSPACE} \
-                            ${WORKSPACE}/artefacts/debug/ \
+                            ${WORKSPACE}/artefacts-lava/ \
                             ${TF_GERRIT_REFSPEC}
 
                 # Generate Code Coverate Report in case there are traces available

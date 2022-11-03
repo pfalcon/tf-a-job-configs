@@ -103,31 +103,35 @@
             !include-raw: scripts/clone.sh
         - shell:
             !include-raw: tf-a-builder/builders.sh
+        - inject:
+            properties-file: artefacts/env
+        - shell: |
+            ln -s "artefacts/${BIN_MODE:-release}" "artefacts-lava"
         - conditional-step:
             condition-kind: file-exists
             on-evaluation-failure: dont-run
-            condition-filename: artefacts/debug/job.yaml
+            condition-filename: artefacts-lava/job.yaml
             condition-basedir: workspace
             steps:
             - shell:  |
                 #!/bin/bash
                 set -e
                 DEVICE_TYPE=fvp
-                CUSTOM_YAML_URL=${BUILD_URL}/artifact/artefacts/debug/job.yaml
-                DEVICE_TYPE=$(awk -F': ' '/device_type/ {print $2}' ${WORKSPACE}/artefacts/debug/job.yaml)
+                CUSTOM_YAML_URL=${BUILD_URL}/artifact/artefacts-lava/job.yaml
+                DEVICE_TYPE=$(awk -F': ' '/device_type/ {print $2}' ${WORKSPACE}/artefacts-lava/job.yaml)
                 cat << EOF > ${WORKSPACE}/lava.param
                 DEVICE_TYPE=${DEVICE_TYPE}
                 LAVA_SERVER=tf.validation.linaro.org
                 EOF
     publishers:
         - archive:
-            artifacts: 'artefacts/**'
+            artifacts: artefacts/**, artefacts-lava/**
             latest-only: false
             allow-empty: true
         - conditional-publisher:
           - condition-kind: file-exists
             on-evaluation-failure: dont-run
-            condition-filename: artefacts/debug/job.yaml
+            condition-filename: artefacts-lava/job.yaml
             condition-basedir: workspace
             action:
                 - postbuildscript:
