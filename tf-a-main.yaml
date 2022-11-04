@@ -235,6 +235,11 @@
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=spm-l3-boot-tests
           property-file: tf-a-env.param
+        - name: tf-a-ci-gateway
+          current-parameters: true
+          kill-phase-on: NEVER
+          predefined-parameters: TEST_GROUPS=tf-l1-boot-tests-plat
+          property-file: tf-a-env.param
     - multijob:
         name: Code coverage
         condition: COMPLETED
