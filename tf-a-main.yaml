@@ -187,6 +187,11 @@
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=tf-l2-boot-tests-bl2_el3
           property-file: tf-a-env.param
+        - name: tf-a-ci-gateway
+          current-parameters: true
+          kill-phase-on: NEVER
+          predefined-parameters: TEST_GROUPS=qemu-boot-tests
+          property-file: tf-a-env.param
     - multijob:
         name: Juno Boot Tests
         condition: COMPLETED
