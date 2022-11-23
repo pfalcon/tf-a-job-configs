@@ -33,7 +33,12 @@
             default: '2022.6.0'
         - bool:
             name: UPLOAD_TO_COVERITY_SCAN_ONLINE
-            default: false
+            default: true
+            description: |-
+              Whether the resulting tarball should be automatically uploaded to Coverity Scan Online.
+              <p>
+              <b style="color:red;">The number of uploads allowed on Coverity Scan Online is LIMITED.
+              Therefore, if you don't need the results to be analysed, please UNTICK this box!<b>
         - string:
             name: SHARE_FOLDER
             default: '/srv/shared/${JOB_NAME}/${BUILD_NUMBER}'
