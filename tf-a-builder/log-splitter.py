@@ -68,8 +68,8 @@ if __name__ == "__main__":
                 msg = line["msg"]
                 dt  = line["dt"]
                 if (level == "target") or (level == "feedback"):
-                    namespace = line["ns"] if "ns" in line else level
 
+                    namespace = line["ns"] if "ns" in line else "common"
                     if namespace not in opened_logfile:
                         des_log_file = f"{des_dir}/lava-{namespace}.log"
                         opened_logfile[namespace] = open(des_log_file, "w")
