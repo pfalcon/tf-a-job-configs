@@ -17,7 +17,7 @@
 
 set -x
 
-FEEDBACK=feedback.log
+FEEDBACK=lava-common.log
 COVTRACE=covtrace.log
 COVPREFIX=covtrace-
 CONFIG_JSON=config_file.json
