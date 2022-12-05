@@ -67,10 +67,7 @@
 
             # Fetch coverity tool and untar it
             cd ${WORKSPACE}
-            wget https://scan.coverity.com/download/linux64 \
-                --quiet \
-                --post-data "token=${TF_COVERITY_SCAN_TOKEN}&project=ARM-software%2Farm-trusted-firmware" \
-                -O coverity_tool.tgz
+            wget https://downloads.trustedfirmware.org/tf-a/tf-a-coverity/coverity_tool.tgz
             tar -xzf coverity_tool.tgz
             mv cov-analysis-linux64-${COVERITY_VERSION} coverity
             export PATH=${WORKSPACE}/coverity/bin:${PATH}
