@@ -1,0 +1,138 @@
+- job:
+    name: tf-a-tftf-main
+    description: Main CI job for the Trusted Firmware-A Test Framework.
+    node: docker-amd64-tf-a-bionic
+    project-type: multijob
+    concurrent: true
+    disabled: false
+    properties:
+      - authorization:
+          !include: authorization.yaml.inc
+      - build-discarder:
+          days-to-keep: 14
+          num-to-keep: 60
+      - throttle:
+          option: project
+          enabled: true
+          max-total: 5
+    parameters:
+      - string:
+          name: TF_GERRIT_PROJECT
+          default: "TF-A/trusted-firmware-a"
+          description: "Gerrit project name for Trusted Firmware-A."
+      - string:
+          name: TF_GERRIT_BRANCH
+          default: "refs/heads/master"
+          description: "Git project branch for Trusted Firmware-A."
+      - string:
+          name: TF_GERRIT_REFSPEC
+          default: "+refs/heads/master:refs/remotes/origin/master"
+          description: "Git refspec for Trusted Firmware-A."
+      - string:
+          name: TFTF_GERRIT_PROJECT
+          default: "TF-A/tf-a-tests"
+          description: "Gerrit project name for the Trusted Firmware-A Test Framework."
+      - string:
+          name: TFTF_GERRIT_BRANCH
+          default: "refs/heads/master"
+          description: "Git branch for the Trusted Firmware-A Test Framework."
+      - string:
+          name: TFTF_GERRIT_REFSPEC
+          default: "+refs/heads/master:refs/remotes/origin/master"
+          description: "Git refspec for the Trusted Firmware-A Test Framework."
+      - string:
+          name: CI_REFSPEC
+          default: "+refs/heads/master:refs/remotes/origin/master"
+          description: "Git refspec for the Trusted Firmware-A CI scripts."
+      - string:
+          name: SHARE_FOLDER
+          default: "/srv/shared/${JOB_NAME}/${BUILD_NUMBER}"
+          description: "Folder containing shared repositories for downstream pipeline jobs."
+    publishers:
+      - slack:
+          notify-unstable: True
+          notify-failure: True
+          notify-repeated-failure: True
+          notify-back-to-normal: True
+          room: "#trusted-firmware-a-ci-info"
+    triggers:
+      - timed: H H(0-6) * * 1-5
+    wrappers:
+      - credentials-binding:
+          - ssh-user-private-key:
+              credential-id: TFA_CI_BOT_USER_SSH_KEY
+              key-file-variable: CI_BOT_KEY
+              username-variable: CI_BOT_USERNAME
+              passphrase-variable: ""
+      - workspace-cleanup
+      - timestamps
+    builders:
+      - shell:
+          !include-raw: scripts/clone.sh
+      - shell: |
+          #!/bin/bash
+
+          cat << EOF > tf-a-tests-env.param
+          GERRIT_PROJECT=${TFTF_GERRIT_PROJECT}
+          GERRIT_BRANCH=${TFTF_GERRIT_BRANCH}
+          GERRIT_REFSPEC=${TFTF_GERRIT_REFSPEC}
+          QA_SERVER_PROJECT=${JOB_NAME}
+          QA_SERVER_VERSION=${BUILD_NUMBER}
+          SHARE_FOLDER=${SHARE_FOLDER}
+          EOF
+      - multijob:
+          condition: COMPLETED
+          name: Static checks on TFTF
+          projects:
+            - current-parameters: true
+              kill-phase-on: NEVER
+              name: tf-a-static-checks
+              predefined-parameters: |-
+                REPO_UNDER_TEST=trusted-firmware-tf
+              property-file: tf-a-tests-env.param
+      - multijob:
+          condition: COMPLETED
+          name: Build TFTF
+          projects:
+            - current-parameters: true
+              kill-phase-on: NEVER
+              name: tf-a-ci-gateway
+              predefined-parameters: |-
+                TEST_GROUPS=tftf-l1-build
+              property-file: tf-a-tests-env.param
+      - multijob:
+          condition: COMPLETED
+          name: Run TFTF FWU
+          projects:
+            - current-parameters: true
+              kill-phase-on: NEVER
+              name: tf-a-ci-gateway
+              predefined-parameters: |-
+                TEST_GROUPS=tftf-l2-fwu
+              property-file: tf-a-tests-env.param
+      - multijob:
+          condition: COMPLETED
+          name: Run TFTF
+          projects:
+            - current-parameters: true
+              kill-phase-on: NEVER
+              name: tf-a-ci-gateway
+              predefined-parameters: |-
+                TEST_GROUPS=tftf-l1-fvp tftf-l1-juno tftf-l2-fvp-auxiliary tftf-l2-fvp-dynamiq
+              property-file: tf-a-tests-env.param
+            - current-parameters: true
+              kill-phase-on: NEVER
+              name: tf-a-ci-gateway
+              predefined-parameters: |-
+                TEST_GROUPS=spm-l2-boot-tests spm-l3-boot-tests tf-l2-boot-tests-spm-mm tf-l3-boot-tests-spm-mm
+              property-file: tf-a-tests-env.param
+      - multijob:
+          condition: SUCCESSFUL
+          name: Run TFTF Extensive
+          projects:
+            - current-parameters: true
+              kill-phase-on: FAILURE
+              name: tf-a-ci-gateway
+              predefined-parameters: |-
+                TEST_GROUPS=tftf-l2-extensive-tests-fvp
+              property-file: tf-a-tests-env.param
