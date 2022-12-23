@@ -48,13 +48,6 @@
           name: SHARE_FOLDER
           default: "/srv/shared/${JOB_NAME}/${BUILD_NUMBER}"
           description: "Folder containing shared repositories for downstream pipeline jobs."
-    publishers:
-      - slack:
-          notify-unstable: True
-          notify-failure: True
-          notify-repeated-failure: True
-          notify-back-to-normal: True
-          room: "#trusted-firmware-a-ci-info"
     triggers:
       - timed: H H(0-6) * * 1-5
     wrappers:

@@ -25,7 +25,7 @@
 # prevents the latter unless the job is triggered manually from the
 # builder job itself.
 
-set -e
+set -ex
 
 # Global defaults
 REFSPEC_MASTER="refs/heads/master"
