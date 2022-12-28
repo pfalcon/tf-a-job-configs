@@ -81,7 +81,7 @@
               kill-phase-on: NEVER
               name: tf-a-static-checks
               predefined-parameters: |-
-                REPO_UNDER_TEST=trusted-firmware-tf
+                REPO_UNDER_TEST=tf-a-tests
               property-file: tf-a-tests-env.param
       - multijob:
           condition: COMPLETED
