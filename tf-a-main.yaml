@@ -299,4 +299,11 @@
         condition-best: SUCCESS
         condition-worst: SUCCESS
         steps:
-        - shell: bash "${WORKSPACE}/tf-a-ci-scripts/script/scratch_scripts/fast-forward-master.sh"
+        - shell: |-
+            #!/bin/bash
+            if [ $MULTIJOB_FAILED -eq 0 ]; then
+                echo "Proceed with integration->master fast-forward merge"
+                bash "${WORKSPACE}/tf-a-ci-scripts/script/scratch_scripts/fast-forward-master.sh"
+            else
+                echo "Do not proceed with integration->master merge as sub-jobs failed"
+            fi
