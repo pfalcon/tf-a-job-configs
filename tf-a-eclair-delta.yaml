@@ -116,7 +116,7 @@
         )
         fi
         (cd trusted-firmware-a; git log --oneline -n5)
-        detachLicense 4200
+        detachLicense 7200
         trap "returnLicense || true" EXIT
         tf-a-ci-scripts/eclair/analyze_delta.sh ${TF_CONFIG}
         returnLicense
