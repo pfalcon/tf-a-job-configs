@@ -85,22 +85,26 @@
         condition: COMPLETED
         projects:
         - name: tf-a-ci-gateway
+          alias: tf-l1-build-fvp tf-l2-build-fvp
           current-parameters: true
           kill-phase-on: NEVER
           predefined-parameters: |
             TEST_GROUPS=tf-l1-build-fvp tf-l2-build-fvp
           property-file: tf-a-env.param
         - name: tf-a-ci-gateway
+          alias: tf-l1-build-juno tf-l2-build-juno
           current-parameters: true
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=tf-l1-build-juno tf-l2-build-juno
           property-file: tf-a-env.param
         - name: tf-a-ci-gateway
+          alias: tf-l1-build-plat
           current-parameters: true
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=tf-l1-build-plat
           property-file: tf-a-env.param
         - name: tf-a-ci-gateway
+          alias: tf-l1-build-clang
           current-parameters: true
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=tf-l1-build-clang
@@ -110,21 +114,25 @@
         condition: COMPLETED
         projects:
         - name: tf-a-ci-gateway
+          alias: tftf-l2-fwu
           current-parameters: true
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=tftf-l2-fwu
           property-file: tf-a-tests-env.param
         - name: tf-a-ci-gateway
+          alias: tftf-l1-fvp tftf-l2-fvp-auxiliary
           current-parameters: true
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=tftf-l1-fvp tftf-l2-fvp-auxiliary
           property-file: tf-a-tests-env.param
         - name: tf-a-ci-gateway
+          alias: tftf-l2-fvp tftf-l2-fvp-dynamiq
           current-parameters: true
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=tftf-l2-fvp tftf-l2-fvp-dynamiq
           property-file: tf-a-tests-env.param
         - name: tf-a-ci-gateway
+          alias: tftf-l2-extensive-tests-fvp
           current-parameters: true
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=tftf-l2-extensive-tests-fvp
@@ -134,26 +142,31 @@
         condition: COMPLETED
         projects:
         - name: tf-a-ci-gateway
+          alias: tf-l2-boot-tests-foundation
           current-parameters: true
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=tf-l2-boot-tests-foundation
           property-file: tf-a-env.param
         - name: tf-a-ci-gateway
+          alias: tf-l2-boot-tests-aarch32
           current-parameters: true
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=tf-l2-boot-tests-aarch32
           property-file: tf-a-env.param
         - name: tf-a-ci-gateway
+          alias: tf-l2-boot-tests-rootfs
           current-parameters: true
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=tf-l2-boot-tests-rootfs
           property-file: tf-a-env.param
         - name: tf-a-ci-gateway
+          alias: tf-l2-boot-tests-spm-mm
           current-parameters: true
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=tf-l2-boot-tests-spm-mm
           property-file: tf-a-env.param
         - name: tf-a-ci-gateway
+          alias: spm-l2-boot-tests
           current-parameters: true
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=spm-l2-boot-tests
@@ -163,31 +176,37 @@
         condition: COMPLETED
         projects:
         - name: tf-a-ci-gateway
+          alias: tf-l2-boot-tests-misc
           current-parameters: true
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=tf-l2-boot-tests-misc
           property-file: tf-a-env.param
         - name: tf-a-ci-gateway
+          alias: tf-l2-boot-tests-latest
           current-parameters: true
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=tf-l2-boot-tests-latest
           property-file: tf-a-env.param
         - name: tf-a-ci-gateway
+          alias: tf-l2-boot-tests-cortex
           current-parameters: true
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=tf-l2-boot-tests-cortex
           property-file: tf-a-env.param
         - name: tf-a-ci-gateway
+          alias: tf-l2-boot-tests-gicv2
           current-parameters: true
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=tf-l2-boot-tests-gicv2
           property-file: tf-a-env.param
         - name: tf-a-ci-gateway
+          alias: tf-l2-boot-tests-bl2_el3
           current-parameters: true
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=tf-l2-boot-tests-bl2_el3
           property-file: tf-a-env.param
         - name: tf-a-ci-gateway
+          alias: qemu-boot-tests
           current-parameters: true
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=qemu-boot-tests
@@ -197,16 +216,19 @@
         condition: COMPLETED
         projects:
         - name: tf-a-ci-gateway
+          alias: tf-l1-boot-tests-juno
           current-parameters: true
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=tf-l1-boot-tests-juno
           property-file: tf-a-env.param
         - name: tf-a-ci-gateway
+          alias: tf-l2-boot-tests-juno
           current-parameters: true
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=tf-l2-boot-tests-juno
           property-file: tf-a-env.param
         - name: tf-a-ci-gateway
+          alias: tftf-l1-juno
           current-parameters: true
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=tftf-l1-juno
@@ -216,31 +238,37 @@
         condition: COMPLETED
         projects:
         - name: tf-a-ci-gateway
+          alias: tf-l3-boot-tests-css
           current-parameters: true
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=tf-l3-boot-tests-css
           property-file: tf-a-env.param
         - name: tf-a-ci-gateway
+          alias: tf-l3-boot-tests-spm-mm
           current-parameters: true
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=tf-l3-boot-tests-spm-mm
           property-file: tf-a-env.param
         - name: tf-a-ci-gateway
+          alias: tf-l3-boot-tests-ras
           current-parameters: true
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=tf-l3-boot-tests-ras
           property-file: tf-a-env.param
         - name: tf-a-ci-gateway
+          alias: tf-l3-boot-tests-misc
           current-parameters: true
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=tf-l3-boot-tests-misc
           property-file: tf-a-env.param
         - name: tf-a-ci-gateway
+          alias: spm-l3-boot-tests
           current-parameters: true
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=spm-l3-boot-tests
           property-file: tf-a-env.param
         - name: tf-a-ci-gateway
+          alias: tf-l1-boot-tests-plat
           current-parameters: true
           kill-phase-on: NEVER
           predefined-parameters: TEST_GROUPS=tf-l1-boot-tests-plat
