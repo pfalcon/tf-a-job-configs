@@ -8,7 +8,7 @@
       ECLAIR (MISRA compliance) testing of TF-A
     properties:
         - build-discarder:
-            days-to-keep: 45
+            days-to-keep: 40
         - authorization:
             !include: authorization.yaml.inc
         - throttle:
