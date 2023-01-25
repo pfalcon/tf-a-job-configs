@@ -43,7 +43,7 @@
             description: 'Folder containing shared repositories for downstream pipeline jobs'
     wrappers:
       - timeout:
-          timeout: 480
+          timeout: 720
           fail: true
       - credentials-binding:
           - ssh-user-private-key:
