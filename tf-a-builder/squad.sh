@@ -5,6 +5,7 @@ set -xe
 # Wait for the LAVA job to finished
 # By default, timeout at 5400 secs (1.5 hours) and monitor every 60 seconds
 wait_lava_job() {
+    set +x
     local id=$1
     local timeout="${2:-5400}"
     local interval="${3:-60}"
@@ -13,13 +14,18 @@ wait_lava_job() {
 
     while ((t > 0)); do
         sleep $interval
-        resilient_cmd lavacli jobs show $id | tee "${WORKSPACE}/lava-progress.show"
+        resilient_cmd lavacli jobs show $id | tee "${WORKSPACE}/lava-progress.show" | grep 'state *:'
+        set +x
         if grep 'state.*: Finished' "${WORKSPACE}/lava-progress.show"; then
+            set -x
+            cat "${WORKSPACE}/lava-progress.show"
             # finished
             return 0
         fi
         ((t -= interval))
     done
+    set -x
+    cat "${WORKSPACE}/lava-progress.show"
     # timeout
     return 1
 }
@@ -27,6 +33,7 @@ wait_lava_job() {
 # Run the given command passed through parameters, if fails, try
 # at most more N-times with a pause of M-seconds until success.
 resilient_cmd() {
+    set +x
     local cmd="$*"
     local max_wait=10
     local sleep_body=2
@@ -41,9 +48,11 @@ resilient_cmd() {
 
         iter=$(( iter + 1 ))
         if [ ${iter} -ge ${max_wait} ]; then
+            set -x
             return 1
         fi
     done
+    set -x
     return 0
 }
 
