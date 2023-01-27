@@ -42,9 +42,6 @@
             default: '/srv/shared/${JOB_NAME}/${BUILD_NUMBER}'
             description: 'Folder containing shared repositories for downstream pipeline jobs'
     wrappers:
-      - timeout:
-          timeout: 720
-          fail: true
       - credentials-binding:
           - ssh-user-private-key:
               credential-id: TFA_CI_BOT_USER_SSH_KEY
