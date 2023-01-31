@@ -154,7 +154,7 @@
                                 # FVP jobs may hang at some particular TFTF test (see
                                 # https://linaro.atlassian.net/browse/TFC-176)
                                 passed=0
-                                for i in $(seq 1 3); do
+                                for i in $(seq 1 2); do
                                     echo "# SQUAD submission iteration #$i"
                                     if $squad; then
                                         passed=1
