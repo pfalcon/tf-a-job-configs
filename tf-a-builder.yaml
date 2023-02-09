@@ -165,6 +165,7 @@
                                     echo "LAVA JOB RESULT: 1"
                                 else
                                     echo "LAVA JOB RESULT: 0"
+                                    tf-a-job-configs/tf-a-builder/lava-log-process.sh
                                 fi
                 - postbuildscript:
                     builders:
