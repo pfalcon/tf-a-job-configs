@@ -1,6 +1,6 @@
 - job:
     name: tf-a-builder
-    node: docker-amd64-tf-a-bionic
+    node: docker-amd64-tf-a-jammy
     project-type: freestyle
     concurrent: true
     disabled: false
