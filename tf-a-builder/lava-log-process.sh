@@ -17,7 +17,7 @@ if [ -f "${WORKSPACE}/lava-raw.log" ]; then
                 # Generate Code Coverate Report in case there are traces available
                 if find covtrace-*.log; then
                     if [ ! -d "${WORKSPACE}/qa-tools" ]; then
-                        git clone ${QA_TOOLS_REPO} ${WORKSPACE}/qa-tools
+                        git clone ${QA_TOOLS_REPO} -b ${QA_TOOLS_BRANCH:-master} ${WORKSPACE}/qa-tools
                     fi
                     cd ${WORKSPACE}/qa-tools/coverage-tool/coverage-reporting
                     ./branch_coverage.sh \
