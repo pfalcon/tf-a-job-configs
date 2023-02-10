@@ -77,10 +77,10 @@
             default: 'https://qa-reports.linaro.org'
         - string:
             name: QA_TOOLS_REPO
-            default: 'https://git.gitlab.arm.com/tooling/qa-tools.git'
+            default: 'https://git.trustedfirmware.org/ci/qa-tools.git'
         - string:
             name: QA_TOOLS_BRANCH
-            default: 'master'
+            default: 'openci'
         - string:
             name: SHARE_FOLDER
             default: '/srv/shared/${JOB_NAME}/${BUILD_NUMBER}'
