@@ -61,6 +61,12 @@
         name: ENABLE_STATIC_CHECK
         default: false
     - string:
+        name: QA_TOOLS_REPO
+        default: 'https://git.trustedfirmware.org/ci/qa-tools.git'
+    - string:
+        name: QA_TOOLS_BRANCH
+        default: 'openci'
+    - string:
             name: SHARE_FOLDER
             default: '/srv/shared/${JOB_NAME}/${BUILD_NUMBER}'
             description: 'Folder containing shared repositories for downstream pipeline jobs'
