@@ -22,11 +22,11 @@
           description: "Gerrit project name for Trusted Firmware-A."
       - string:
           name: TF_GERRIT_BRANCH
-          default: "refs/heads/master"
+          default: "refs/heads/integration"
           description: "Git project branch for Trusted Firmware-A."
       - string:
           name: TF_GERRIT_REFSPEC
-          default: "+refs/heads/master:refs/remotes/origin/master"
+          default: "+refs/heads/integration:refs/remotes/origin/integration"
           description: "Git refspec for Trusted Firmware-A."
       - string:
           name: TFTF_GERRIT_PROJECT
