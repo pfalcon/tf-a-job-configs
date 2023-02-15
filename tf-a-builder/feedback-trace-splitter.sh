@@ -36,7 +36,7 @@ if [ ! -f ${FEEDBACK} ]; then
 fi
 
 # From the feedback log, take only the trace data
-grep ^${COVPREFIX} ${FEEDBACK} > ${COVTRACE}
+grep -a ^${COVPREFIX} ${FEEDBACK} > ${COVTRACE}
 
 # Check if there are traces
 if [ -n "$(find ${COVTRACE} -empty)" ]; then
@@ -75,7 +75,7 @@ EOF
 for trace_file in $(awk '{print $1}' ${COVTRACE} | uniq); do
 
     # split & remove trace filename in log
-    grep ^${trace_file} ${COVTRACE} > ${trace_file}
+    grep -a ^${trace_file} ${COVTRACE} > ${trace_file}
     sed -i "s;${trace_file} ;;g" ${trace_file}
 done
 
