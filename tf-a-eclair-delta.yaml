@@ -93,7 +93,7 @@
     wrappers:
     - timestamps
     - timeout:
-        timeout: 120
+        timeout: 150
         fail: true
     - credentials-binding:
       - ssh-user-private-key:
@@ -116,7 +116,7 @@
         )
         fi
         (cd trusted-firmware-a; git log --oneline -n5)
-        detachLicense 7200
+        detachLicense 9000
         trap "returnLicense || true" EXIT
         tf-a-ci-scripts/eclair/analyze_delta.sh ${TF_CONFIG}
         returnLicense
