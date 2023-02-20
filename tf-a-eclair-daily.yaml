@@ -121,7 +121,7 @@
             (cd $(basename ${GERRIT_PROJECT}); git checkout $(git rev-list -n1 --before="today" HEAD))
         fi
         (cd $(basename ${GERRIT_PROJECT}); git log -n1)
-        detachLicense 3600
+        detachLicense 5400
         trap "returnLicense" EXIT
         tf-a-ci-scripts/eclair/analyze.sh ${TF_CONFIG}
     publishers:
